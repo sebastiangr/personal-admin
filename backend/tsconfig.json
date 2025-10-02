@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    // --- Configuración del Módulo y Objetivo ---
+    "target": "es2020",                  // Apuntamos a una versión moderna de JS compatible con Node 18
+    "module": "commonjs",                 // Usamos el sistema de módulos estándar de Node.js
+    "moduleResolution": "node",           // Cómo Node.js resuelve los módulos
+    "lib": ["es2020", "dom"],              // ¡SOLUCIÓN 2! Incluimos la librería de JS de ES2020 (que tiene .finally())
+
+    // --- Rutas y Salida ---
+    "rootDir": "./src",                   // La raíz de nuestro código fuente de la aplicación
+    "outDir": "./dist",                   // Dónde se compilará el JavaScript
+
+    // --- Interoperabilidad y Tipado Estricto ---
+    "esModuleInterop": true,              // Permite 'import express from "express"'
+    "forceConsistentCasingInFileNames": true, // Evita problemas de mayúsculas/minúsculas en los nombres de archivo
+    "strict": true,                       // Activa todas las comprobaciones estrictas de tipos
+    "skipLibCheck": true,                 // No comprueba los tipos de las librerías de terceros (acelera la compilación)
+    "verbatimModuleSyntax": false,        // Resuelve el error anterior de import/require
+    
+    // --- Tipos Explícitos ---
+    "types": ["node"]                     // ¡SOLUCIÓN 1! Le decimos que cargue los tipos de Node.js globalmente
+  },
+
+  // --- Ámbito de Compilación para `npm run build` ---
+  "include": ["src/**/*"],                // Para el build, solo nos importa compilar la carpeta 'src'
+  "exclude": ["node_modules"]             // Siempre excluimos node_modules
+}
