@@ -10,7 +10,11 @@ const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
 // Middlewares
-app.use(cors()); // Permite peticiones del frontend
+const corsOptions = {
+  origin: 'https://admin.sebastiangonzalez.co', // Futuro frontend
+  optionsSuccessStatus: 200 // Para navegadores antiguos
+};
+app.use(cors(corsOptions));  // Permite peticiones del frontend
 app.use(express.json()); // Permite a Express entender JSON
 
 // Middleware para autenticar el Token JWT
