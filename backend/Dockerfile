@@ -20,7 +20,7 @@ COPY . .
 # Necesitamos las devDependencies para esto, así que las instalamos, compilamos y luego las eliminamos.
 RUN npm install
 RUN npm run build
-RUN npm prune --production
+# RUN npm prune --production
 
 # 7. Generate Prisma Client: Nos aseguramos de que el cliente de Prisma se genere dentro del entorno del contenedor
 RUN npx prisma generate
