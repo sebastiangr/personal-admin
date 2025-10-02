@@ -12,7 +12,7 @@ services:
     volumes:
       - admin-data:/var/lib/postgresql/data
     networks:
-      - admin_network
+      - shared_network
     ports:
       - "5440:5432" # Public port 5440 VPS
 
@@ -29,12 +29,12 @@ services:
       DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres_db:5432/${DB_NAME}"
       JWT_SECRET: ${JWT_SECRET}
     networks:
-      - admin_network
+      - shared_network
 
 # NETWORK
 networks:
-  admin_network:
-    driver: bridge
+  shared_network:
+    external: true
 
 # VOLUME
 volumes:
