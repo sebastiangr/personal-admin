@@ -10,11 +10,33 @@ const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
 // Middlewares
+
+const allowedOrigins = [
+  'https://admin.sebastiangonzalez.co', // Origen de producción
+  'http://localhost:5173'             // Origen de desarrollo de Vue
+];
+
 const corsOptions = {
-  origin: 'https://admin.sebastiangonzalez.co', // Futuro frontend
-  optionsSuccessStatus: 200 // Para navegadores antiguos
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Permite peticiones sin 'origin' (como las de Postman/Thunder Client)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'La política de CORS para este sitio no permite acceso desde el origen especificado.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions));  // Permite peticiones del frontend
+
+app.use(cors(corsOptions));
+
+// const corsOptions = {
+//   origin: 'https://admin.sebastiangonzalez.co', // Futuro frontend
+
+//   optionsSuccessStatus: 200 // Para navegadores antiguos
+// };
+// app.use(cors(corsOptions));  // Permite peticiones del frontend
 app.use(express.json()); // Permite a Express entender JSON
 
 // Middleware para autenticar el Token JWT
