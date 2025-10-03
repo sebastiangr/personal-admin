@@ -43,7 +43,7 @@ if (authStore.isAuthenticated) {
   <div class="flex items-center justify-center min-h-screen bg-base-200 p-4">
     <div class="card w-full max-w-sm shrink-0 bg-base-100 shadow-xl border border-base-300">
       <form class="card-body" @submit.prevent="handleLogin">
-        <h1 class="card-title text-2xl mb-4 text-center block">JobSpear Admin</h1>
+        <h1 class="card-title text-2xl mb-4 text-center block">Personal Admin</h1>
         
         <!-- Mensaje de Error (v-if para mostrar/ocultar) -->
         <div v-if="errorMessage" class="alert alert-error text-sm">
