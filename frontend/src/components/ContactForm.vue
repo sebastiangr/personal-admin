@@ -69,37 +69,37 @@
 
 <template>
   <form @submit.prevent="handleSubmit">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Campo Nombre de la Empresa -->
-      <div class="form-control col-span-2">
-        <label class="label"><span class="label-text">Nombre de la Empresa*</span></label>
-        <input v-model="formData.companyName" type="text" class="input input-bordered" required />
+      <div class="flex flex-col col-span-2 w-full">
+        <label class="mb-1 font-semibold text-sm">Nombre de la Empresa*</label>
+        <input v-model="formData.companyName" type="text" class="input input-bordered w-full" required />
       </div>
       <!-- Campo Nombre del Contacto -->
-      <div class="form-control">
-        <label class="label"><span class="label-text">Nombre del Contacto</span></label>
-        <input v-model="formData.contactName" type="text" class="input input-bordered" />
+      <div class="flex flex-col w-full">
+        <label class="mb-1 font-semibold text-sm">Nombre del Contacto</label>
+        <input v-model="formData.contactName" type="text" class="input input-bordered w-full" />
       </div>
       <!-- Campo Email -->
-      <div class="form-control">
-        <label class="label"><span class="label-text">Email</span></label>
-        <input v-model="formData.email" type="email" class="input input-bordered" />
+      <div class="flex flex-col w-full">
+        <label class="mb-1 font-semibold text-sm">Email</label>
+        <input v-model="formData.email" type="email" class="input input-bordered w-full" />
       </div>
       <!-- ... (más campos) ... -->
-      <div class="form-control col-span-2">
-        <label class="label"><span class="label-text">Sitio Web</span></label>
-        <input v-model="formData.website" type="url" class="input input-bordered" />
+      <div class="flex flex-col col-span-2 w-full">
+        <label class="mb-1 font-semibold text-sm">Sitio Web</label>
+        <input v-model="formData.website" type="url" class="input input-bordered w-full" />
       </div>
-      <div class="form-control col-span-2">
-        <label class="label"><span class="label-text">Notas</span></label>
-        <textarea v-model="formData.notes" class="textarea textarea-bordered" rows="3"></textarea>
+      <div class="flex flex-col col-span-2 w-full">
+        <label class="mb-1 font-semibold text-sm">Notas</label>
+        <textarea v-model="formData.notes" class="textarea textarea-bordered w-full" rows="3"></textarea>
       </div>
     </div>
-    
-    <!-- Slot para las acciones (se pasará al slot 'actions' del modal) -->
-    <div class="mt-6 flex justify-end gap-4">
-      <button type="button" class="btn btn-ghost" @click="$emit('cancel')">Cancelar</button>
-      <button type="submit" class="btn btn-primary">Guardar Contacto</button>
+
+    <!-- Acciones -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+      <button type="button" class="btn btn-secondary w-full" @click="$emit('cancel')">Cancelar</button>
+      <button type="submit" class="btn btn-primary w-full">Guardar Contacto</button>
     </div>
   </form>
 </template>

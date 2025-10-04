@@ -34,6 +34,10 @@ async function apiClient(endpoint: string, options: RequestInit = {}) {
 
   try {
     const response = await fetch(`${BASE_URL}${endpoint}`, finalOptions)
+    
+    if (response.status === 204) {
+      return null;
+    }
 
     // Si la respuesta no es OK (ej. 401, 404, 500), lanzamos un error
     if (!response.ok) {

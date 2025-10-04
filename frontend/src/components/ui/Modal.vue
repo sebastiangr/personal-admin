@@ -1,14 +1,15 @@
 <script setup lang="ts">
-// --- PROPS Y EMITS ---
-// defineProps define las "propiedades" que el componente padre puede pasarle.
-defineProps<{
-  title?: string // Un título opcional para el modal
-}>()
+  import { X } from 'lucide-vue-next';
+  // --- PROPS Y EMITS ---
+  // defineProps define las "propiedades" que el componente padre puede pasarle.
+  defineProps<{
+    title?: string // Un título opcional para el modal
+  }>()
 
-// defineModel es la forma moderna (Vue 3.4+) de crear un v-model.
-// 'isOpen' será una variable reactiva que está sincronizada bidireccionalmente
-// con la variable que el padre le pase a través de v-model.
-const isOpen = defineModel<boolean>()
+  // defineModel es la forma moderna (Vue 3.4+) de crear un v-model.
+  // 'isOpen' será una variable reactiva que está sincronizada bidireccionalmente
+  // con la variable que el padre le pase a través de v-model.
+  const isOpen = defineModel<boolean>()
 </script>
 
 <template>
@@ -23,7 +24,7 @@ const isOpen = defineModel<boolean>()
         <!-- Título y Botón de Cierre -->
         <div class="flex justify-between items-center mb-4">
           <h3 v-if="title" class="font-bold text-lg">{{ title }}</h3>
-          <button class="btn btn-sm btn-circle btn-ghost" @click="isOpen = false">✕</button>
+          <button class="btn btn-sm btn-circle btn-ghost" @click="isOpen = false"><X /></button>
         </div>
 
         <!-- 
