@@ -1,16 +1,14 @@
-// src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import LoginView from '@/views/LoginView.vue'
 
-// Importación dinámica de la vista protegida
 const ContactsView = () => import('@/views/app/ContactsView.vue')
-const HistoryView = () => import('@/views/app/HistoryView.vue') // Aún no existe, pero la dejamos
+const HistoryView = () => import('@/views/app/HistoryView.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', redirect: '/app/contacts' }, // Redirige la raíz a la app
+    { path: '/', redirect: '/app/contacts' },
     { path: '/login', name: 'login', component: LoginView },
     
     // --- RUTAS PROTEGIDAS ---
@@ -19,13 +17,13 @@ const router = createRouter({
       name: 'app',
       redirect: '/app/contacts',
       // Este es el layout principal de la aplicación, donde irá el Navbar/Sidebar
-      component: () => import('@/views/AppLayout.vue'), // PRÓXIMAMENTE: Creamos este AppLayout.vue
+      component: () => import('@/views/AppLayout.vue'),
       children: [
         {
           path: 'contacts',
           name: 'contacts',
           component: ContactsView,
-          meta: { requiresAuth: true } // ¡La etiqueta de seguridad!
+          meta: { requiresAuth: true }
         },
         {
           path: 'history',
@@ -44,33 +42,28 @@ const router = createRouter({
 // --- GUARDIÁN DE RUTA (Navigation Guard) ---
 // Se ejecuta ANTES de que cualquier ruta cambie.
 router.beforeEach((to, from, next) => {
-  next();
+  // Primero, obtenemos el store
   const authStore = useAuthStore()
-  
-  // 1. Si la ruta requiere autenticación y NO estamos autenticados...
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    // Redirige a la página de login.
+  const isAuthenticated = authStore.isAuthenticated
+
+  // Definimos qué rutas requieren autenticación
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+
+  // 1. Si la ruta requiere autenticación y el usuario NO está logueado
+  if (requiresAuth && !isAuthenticated) {
+    // Lo enviamos al login
     next({ name: 'login' })
   } 
-  // 2. Si la ruta es el login y SÍ estamos autenticados...
-  else if (to.name === 'login' && authStore.isAuthenticated) {
-    // Redirige a la página principal de la app.
+  // 2. Si el usuario intenta ir al login pero YA está logueado
+  else if (to.name === 'login' && isAuthenticated) {
+    // Lo enviamos a la página principal de la app
     next({ name: 'contacts' })
   } 
-  // 3. En cualquier otro caso, permite la navegación.
+  // 3. En todos los demás casos (ruta pública o ruta protegida con usuario logueado)
   else {
-    next()
+    // Permitimos que continúe a su destino
+    next() 
   }
 })
 
 export default router
-// **NOTA IMPORTANTE:** El `router.beforeEach` es el **Guardián de Ruta**. Es el código que se ejecuta en cada navegación para comprobar la seguridad.
-
-// import { createRouter, createWebHistory } from 'vue-router'
-
-// const router = createRouter({
-//   history: createWebHistory(import.meta.env.BASE_URL),
-//   routes: [],
-// })
-
-// export default router

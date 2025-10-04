@@ -40,9 +40,9 @@ if (authStore.isAuthenticated) {
 
 <template>
   <!-- ESTRUCTURA HTML (Utiliza DaisyUI y Tailwind para el responsive) -->
-  <div class="flex items-center justify-center min-h-screen bg-base-200 p-4">
+  <div class="flex items-center justify-center min-h-screen bg-sky-300 p-4">
     <div class="card w-full max-w-sm shrink-0 bg-base-100 shadow-xl border border-base-300">
-      <form class="card-body" @submit.prevent="handleLogin">
+      <form class="card-body p-10" @submit.prevent="handleLogin">
         <h1 class="card-title text-2xl mb-4 text-center block">Personal Admin</h1>
         
         <!-- Mensaje de Error (v-if para mostrar/ocultar) -->

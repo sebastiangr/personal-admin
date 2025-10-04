@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import apiClient from '@/utils/api' // <-- ¡Importamos nuestro cliente!
-  import { useAuthStore } from '@/stores/auth'
   import Modal from '@/components/ui/Modal.vue' // <-- 1. Importa el Modal
   import ContactForm from '@/components/ContactForm.vue' // <-- 2. Importa el Formulario
 
@@ -49,6 +48,9 @@
 </script>
 
 <template>
+
+
+
   <div class="p-4 md:p-8">
     <div class="flex flex-wrap gap-4 justify-between items-center mb-6">
       <h1 class="text-3xl font-bold">Contactos</h1>
@@ -56,8 +58,7 @@
         <!-- 4. Botón que abre el modal -->
         <button class="btn btn-primary" @click="isModalOpen = true">
           Añadir Contacto
-        </button>
-        <button class="btn btn-ghost" @click="useAuthStore().logout()">Cerrar Sesión</button>
+        </button>        
       </div>
     </div>
     
