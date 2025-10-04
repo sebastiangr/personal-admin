@@ -134,21 +134,52 @@ app.put('/api/contacts/:id', authenticateToken, async (req, res) => {
 });
 
 // Borrar un contacto
+// app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
+//     const { id } = req.params;
+    
+//     try {
+//         await prisma.contact.delete({
+//             where: { id },
+//         });
+//         // Usamos 204 No Content, un estándar para borrados exitosos sin respuesta.
+//         res.status(204).send();
+//     } catch (error) {
+//         // Maneja el caso en que el contacto no se encuentre
+//         res.status(404).json({ error: 'Contacto no encontrado' });
+//     }
+// });
 app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    
+
+    // --- LOGGING DE DIAGNÓSTICO ---
+    console.log(`[DELETE] Petición recibida para borrar el contacto con ID: ${id}`);
+    console.log(`[DELETE] Tipo de dato del ID recibido: ${typeof id}`);
+
     try {
+        // Log para ver el objeto que pasamos a Prisma
+        console.log(`[DELETE] Intentando ejecutar prisma.contact.delete con: { where: { id: "${id}" } }`);
+
         await prisma.contact.delete({
             where: { id },
         });
-        // Usamos 204 No Content, un estándar para borrados exitosos sin respuesta.
+
+        console.log(`[DELETE] Contacto con ID: ${id} borrado exitosamente.`);
         res.status(204).send();
-    } catch (error) {
-        // Maneja el caso en que el contacto no se encuentre
-        res.status(404).json({ error: 'Contacto no encontrado' });
+    } catch (error: any) {
+        // Log para ver el error exacto que Prisma devuelve
+        console.error(`[DELETE] Prisma ha devuelto un error:`, error);
+        
+        // El error de Prisma P2025 "Record to delete not found." es el que esperamos si no lo encuentra.
+        if (error.code === 'P2025') {
+            console.error(`[DELETE] Causa probable: El ID "${id}" no existe en la base de datos.`);
+            return res.status(404).json({ error: 'Contacto no encontrado en la base de datos.' });
+        }
+
+        // Para cualquier otro error
+        res.status(500).json({ error: 'Error interno del servidor al intentar borrar el contacto.' });
     }
 });
-
+s
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3000;

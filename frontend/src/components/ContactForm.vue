@@ -1,33 +1,70 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+  import { ref, watch } from 'vue';
 
-// --- EMITS ---
-// defineEmits declara los eventos personalizados que este componente puede "emitir"
-// hacia su componente padre.
-const emit = defineEmits<{
-  (e: 'submit', formData: Record<string, any>): void
-  (e: 'cancel'): void
-}>()
+  // --- PROPS ---
+  const props = defineProps<{
+    initialData?: Record<string, any> | null
+  }>()
 
-// --- ESTADO DEL FORMULARIO ---
-// Usamos ref() para cada campo del formulario.
-const formData = ref({
-  companyName: '',
-  contactName: '',
-  email: '',
-  website: '',
-  sector: '',
-  notes: '',
-  interestLevel: 1, // Valor por defecto
-  status: 'BACKLOG', // Valor por defecto
-});
+  // --- EMITS ---
+  // defineEmits declara los eventos personalizados que este componente puede "emitir"
+  // hacia su componente padre.
+  const emit = defineEmits<{
+    (e: 'submit', formData: Record<string, any>): void
+    (e: 'cancel'): void
+  }>()
 
-// --- MÉTODOS ---
-function handleSubmit() {
-  // Cuando el formulario se envía, emitimos el evento 'submit'
-  // y pasamos una copia de los datos del formulario como carga útil (payload).
-  emit('submit', { ...formData.value });
-}
+  // --- ESTADO DEL FORMULARIO ---
+  // Usamos ref() para cada campo del formulario.
+  const formData = ref({
+    companyName: '',
+    contactName: '',
+    email: '',
+    website: '',
+    sector: '',
+    notes: '',
+    interestLevel: 1, // Valor por defecto
+    status: 'BACKLOG', // Valor por defecto
+  });
+
+  // --- WATCHER ---
+  // watch() observa cambios en una fuente (props.initialData).
+  // Se ejecutará cada vez que el padre cambie el contacto a editar.
+  watch(() => props.initialData, (newData) => {
+    if (newData) {
+      // Si hay datos iniciales, los copiamos a nuestro formulario.
+      formData.value = {
+        companyName: newData.companyName ?? '',
+        contactName: newData.contactName ?? '',
+        email: newData.email ?? '',
+        website: newData.website ?? '',
+        sector: newData.sector ?? '',
+        notes: newData.notes ?? '',
+        interestLevel: newData.interestLevel ?? 1,
+        status: newData.status ?? 'BACKLOG',
+      };
+    } else {
+      // Si no, reseteamos el formulario (para el modo "Crear").
+      formData.value = {
+        companyName: '',
+        contactName: '',
+        email: '',
+        website: '',
+        sector: '',
+        notes: '',
+        interestLevel: 1,
+        status: 'BACKLOG',
+      };
+    }
+  }, { immediate: true }); // immediate: true hace que se ejecute una vez al crearse.
+
+
+  // --- MÉTODOS ---
+  function handleSubmit() {
+    // El padre ya sabrá si es una edición o creación.
+    // El formulario solo emite los datos.
+    emit('submit', formData.value);
+  }
 </script>
 
 <template>
