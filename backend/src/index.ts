@@ -133,6 +133,22 @@ app.put('/api/contacts/:id', authenticateToken, async (req, res) => {
     res.json(updatedContact);
 });
 
+// Borrar un contacto
+app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        await prisma.contact.delete({
+            where: { id },
+        });
+        // Usamos 204 No Content, un estándar para borrados exitosos sin respuesta.
+        res.status(204).send();
+    } catch (error) {
+        // Maneja el caso en que el contacto no se encuentre
+        res.status(404).json({ error: 'Contacto no encontrado' });
+    }
+});
+
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3000;

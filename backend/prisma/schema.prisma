@@ -35,7 +35,7 @@ model ActivityLog {
   id                String   @id @default(uuid())
   eventDescription  String
   createdAt         DateTime @default(now())
-  contact           Contact  @relation(fields: [contactId], references: [id])
+  contact           Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
   contactId         String
 }
 
