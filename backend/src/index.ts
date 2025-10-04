@@ -165,7 +165,7 @@ app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
 
         console.log(`[DELETE] Contacto con ID: ${id} borrado exitosamente.`);
         res.status(204).send();
-    } catch (error: any) {
+    } catch (errors: any) {
         // Log para ver el error exacto que Prisma devuelve
         console.error(`[DELETE] Prisma ha devuelto un error:`, error);
         
@@ -179,7 +179,7 @@ app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Error interno del servidor al intentar borrar el contacto.' });
     }
 });
-s
+
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3000;
