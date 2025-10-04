@@ -11,6 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
 // Middlewares
 
+// TODO: Use .env variables here
 const allowedOrigins = [
   'https://admin.sebastiangonzalez.co', // Origen de producción
   'http://localhost:5173'             // Origen de desarrollo de Vue
@@ -28,15 +29,7 @@ const corsOptions = {
   },
   optionsSuccessStatus: 200
 };
-
 app.use(cors(corsOptions));
-
-// const corsOptions = {
-//   origin: 'https://admin.sebastiangonzalez.co', // Futuro frontend
-
-//   optionsSuccessStatus: 200 // Para navegadores antiguos
-// };
-// app.use(cors(corsOptions));  // Permite peticiones del frontend
 app.use(express.json()); // Permite a Express entender JSON
 
 // Middleware para autenticar el Token JWT
@@ -57,7 +50,8 @@ const authenticateToken = (req: any, res: any, next: any) => {
 
 // Ruta para el Login del Admin
 app.post('/auth/login', async (req, res) => {
-    const { username, password } = req.body;
+    console.log('[POST] /auth/login - Intento de inicio de sesión recibido.');
+    const { username, password } = req.body;    
     const user = await prisma.user.findUnique({ where: { username } });
 
     if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
@@ -65,6 +59,7 @@ app.post('/auth/login', async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '8h' });
+    console.log('[POST] /auth/login - El usuarui ${username} ha iniciado sesión.');
     res.json({ token });
 });
 
@@ -72,6 +67,7 @@ app.post('/auth/login', async (req, res) => {
 
 // Obtener todos los contactos con filtros
 app.get('/api/contacts', authenticateToken, async (req, res) => {
+    console.log('[GET] /api/contacts - Petición para obtener todos los contactos.');
     const { status, interest, search } = req.query;
 
     const where: any = {};
@@ -89,11 +85,13 @@ app.get('/api/contacts', authenticateToken, async (req, res) => {
         where,
         orderBy: { createdAt: 'desc' }
     });
+    console.log('[GET] /api/contacts - Se encontraron y devolvieron ${contacts.length} contactos.');
     res.json(contacts);
 });
 
 // Crear un nuevo contacto
 app.post('/api/contacts', authenticateToken, async (req, res) => {
+    console.log('[POST] /api/contacts - Petición para crear un nuevo contacto.');
     const newContact = await prisma.contact.create({
         data: req.body,
     });
@@ -104,13 +102,15 @@ app.post('/api/contacts', authenticateToken, async (req, res) => {
             eventDescription: `Contacto '${newContact.companyName}' creado.`
         }
     });
+    console.log(`[POST] /api/contacts - Contacto '${newContact.companyName}' (ID: ${newContact.id}) creado exitosamente.`);
     res.status(201).json(newContact);
 });
 
 // Actualizar un contacto
 app.put('/api/contacts/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    
+    console.log(`[PUT] /api/contacts/${id} - Petición para actualizar contacto.`);
+
     // Obtenemos el estado anterior antes de actualizar
     const oldContact = await prisma.contact.findUnique({ where: { id }});
     if (!oldContact) return res.status(404).json({ error: 'Contacto no encontrado' });
@@ -129,25 +129,10 @@ app.put('/api/contacts/:id', authenticateToken, async (req, res) => {
             }
         });
     }
-
+    console.log(`[PUT] /api/contacts/${id} - Contacto ${updatedContact.companyName} (ID: ${updatedContact.id})actualizado exitosamente.`);
     res.json(updatedContact);
 });
 
-// Borrar un contacto
-// app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
-//     const { id } = req.params;
-    
-//     try {
-//         await prisma.contact.delete({
-//             where: { id },
-//         });
-//         // Usamos 204 No Content, un estándar para borrados exitosos sin respuesta.
-//         res.status(204).send();
-//     } catch (error) {
-//         // Maneja el caso en que el contacto no se encuentre
-//         res.status(404).json({ error: 'Contacto no encontrado' });
-//     }
-// });
 app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
