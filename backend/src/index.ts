@@ -59,7 +59,7 @@ app.post('/auth/login', async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '8h' });
-    console.log('[POST] /auth/login - El usuarui ${username} ha iniciado sesión.');
+    console.log('[POST] /auth/login - El usuario ${user.username} ha iniciado sesión.');
     res.json({ token });
 });
 
