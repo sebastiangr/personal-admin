@@ -167,10 +167,10 @@ app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
         res.status(204).send();
     } catch (errors: any) {
         // Log para ver el error exacto que Prisma devuelve
-        console.error(`[DELETE] Prisma ha devuelto un error:`, error);
+        console.error(`[DELETE] Prisma ha devuelto un error:`, errors);
         
         // El error de Prisma P2025 "Record to delete not found." es el que esperamos si no lo encuentra.
-        if (error.code === 'P2025') {
+        if (errors.code === 'P2025') {
             console.error(`[DELETE] Causa probable: El ID "${id}" no existe en la base de datos.`);
             return res.status(404).json({ error: 'Contacto no encontrado en la base de datos.' });
         }
