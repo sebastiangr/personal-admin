@@ -212,13 +212,6 @@
                 </button>
               </th>
               
-              
-              <!-- <th>
-                <button @click="setSort('contactName')" class="flex items-center gap-2">
-                  Contacto <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="contactName" />
-                </button>
-              </th>              
-               -->
               <th>Email</th>
               <th>Sitio Web</th>      
 
@@ -241,23 +234,8 @@
                   <span>Estado</span>
                   <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="status" />
                 </button>
-              </th>            
-              
-              <!-- <th class="text-center">
-                <button @click="setSort('sector')" class="flex items-center gap-2">
-                  Sector <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="sector" />
-                </button>
-              </th>
-              <th class="w-[120px]">
-                <button @click="setSort('interestLevel')" class="flex items-center justify-center gap-2 w-full">
-                  Interés <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="interestLevel" />
-                </button>
-              </th>
-              <th class="text-center">
-                <button @click="setSort('status')" class="flex items-center justify-center gap-2 w-full">
-                  Estado <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="status" />
-                </button>
-              </th> -->
+              </th>      
+
               <th class="text-center w-[150px]">Acciones</th>
             </tr>
           </thead>
@@ -286,6 +264,7 @@
                 <div v-if="contact.notes && contact.notes.trim() !== ''" class="tooltip tooltip-top" data-tip="Ver notas">
                   <button class="btn btn-sm btn-square btn-primary" @click="openEditModal(contact)"> <NotepadText color="white":size="20":stroke-width="1.5"/></button>
                 </div>
+                <!-- TODO: Config notes modal -->
                 <div class="tooltip" v-else>
                   <button class="btn btn-sm btn-square btn-disabled"> <NotepadText color="white":size="20":stroke-width="1.5"/></button>
                 </div>                

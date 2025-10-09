@@ -60,7 +60,7 @@ watchEffect(() => {
         </RouterLink>
       </div>
 
-      <!-- Centro: Enlaces de Navegación -->
+      <!-- TODO: Improve nav links -->
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
           <li>
@@ -146,13 +146,3 @@ watchEffect(() => {
     background-color: green;
   }
 </style>
-
-<!-- <script setup lang="ts">
-  import { RouterView } from 'vue-router'
-</script>
-
-<template> -->
-  <!-- Por ahora solo renderizamos el contenido. Aquí es donde
-       se colocarán el Navbar, el Sidebar, y el Footer más tarde. -->
-  <!-- <RouterView />
-</template> -->

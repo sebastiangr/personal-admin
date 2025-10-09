@@ -1,5 +1,7 @@
-<!-- src/views/app/ContactsView.vue -->
 <template>
+
+  <!-- TODO: View of all logs organized from newest to oldest, add pagination. -->
+  TODO: Add links to the 
   <div class="p-8">
     <h1 class="text-3xl font-bold">History View</h1>
     <p class="mt-4 text-lg">Sección History.</p>
