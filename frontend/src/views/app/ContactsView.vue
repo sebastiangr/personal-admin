@@ -198,15 +198,15 @@
                   Empresa <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="companyName" />
                 </button>
               </th> -->
-              <th>
-                <button @click="setSort('companyName')" class="flex items-center justify-between w-full gap-2">
-                  <span>Empresa</span> <!-- Envolvemos el texto en un span -->
+              <th class="p-0">
+                <button @click="setSort('companyName')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2 cursor-pointer">
+                  <span>Empresa</span>
                   <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="companyName" />
                 </button>
               </th>
 
-              <th>
-                <button @click="setSort('contactName')" class="flex items-center justify-between w-full gap-2">
+              <th class="p-0">
+                <button @click="setSort('contactName')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2 cursor-pointer">
                   <span>Contacto</span>
                   <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="contactName" />
                 </button>
@@ -222,26 +222,26 @@
               <th>Email</th>
               <th>Sitio Web</th>      
 
-              <th>
-                <button @click="setSort('sector')" class="flex items-center justify-between w-full gap-2">
+              <th class="p-0">
+                <button @click="setSort('sector')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2 cursor-pointer">
                   <span>Sector</span>
                   <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="sector" />
                 </button>
               </th>
 
-              <th class="w-[120px]">
-                <button @click="setSort('interestLevel')" class="flex items-center justify-center w-full gap-2">
+              <th class="p-0 w-[110px]"> <!-- Le damos un poco más de espacio a Interés -->
+                <button @click="setSort('interestLevel')" class="flex items-center justify-center w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2 cursor-pointer">
                   <span>Interés</span>
                   <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="interestLevel" />
                 </button>
               </th>
 
-              <th class="text-center">
-                <button @click="setSort('status')" class="flex items-center justify-center w-full gap-2">
+              <th class="p-0">
+                <button @click="setSort('status')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2 cursor-pointer">
                   <span>Estado</span>
                   <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="status" />
                 </button>
-              </th>              
+              </th>            
               
               <!-- <th class="text-center">
                 <button @click="setSort('sector')" class="flex items-center gap-2">
