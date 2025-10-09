@@ -1,33 +1,38 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
-  import apiClient from '@/utils/api' // <-- ¡Importamos nuestro cliente!
-  import Modal from '@/components/ui/Modal.vue' // <-- 1. Importa el Modal
-  import ContactForm from '@/components/ContactForm.vue' // <-- 2. Importa el Formulario
+  import apiClient from '@/utils/api'
+  import Modal from '@/components/ui/Modal.vue'
+  import ContactForm from '@/components/ContactForm.vue'
   import ConfirmationModal from '@/components/ui/ConfirmationModal.vue'
-  import { UserRoundPlus } from 'lucide-vue-next';
-  
-  // --- ESTADO ---
-  const contacts = ref<any[]>([]) // Un array para guardar los contactos
-  const isLoading = ref(true) // Para mostrar un spinner mientras cargan los datos
-  const error = ref<string | null>(null) // Para mostrar mensajes de error
+  import InterestIndicator from '@/components/ui/InterestIndicator.vue'
+  import InteractiveInterest from '@/components/InteractiveInterest.vue'
+  import StatusSelector from '@/components/StatusSelector.vue'
+  import SortIcon from '@/components/ui/SortIcon.vue'
 
-  // Estado para el modal de Crear/Editar
+  import { UserRoundPlus, NotepadText, Trash2, UserRoundPen, ChevronUp, ChevronDown } from 'lucide-vue-next';
+  
+  // TODO: Improve spinners in general
+  // --- STATES ---
+  const contacts = ref<any[]>([])
+  const isLoading = ref(true) // Spinner
+  const error = ref<string | null>(null)
+  const sortKey = ref<string>('companyName')
+  const sortOrder = ref<'asc' | 'desc'>('asc')  
+
+  // State modal
   const isFormModalOpen = ref(false)
   const contactToEdit = ref<any | null>(null) // KEY: si es null=Crear, si tiene objeto=Editar
 
-  // Estado para el modal de Confirmar Borrado
   const isConfirmModalOpen = ref(false)
-  const contactToDeleteId = ref<string | null>(null) // Para recordar qué ID borrar
-  const isDeleting = ref(false) // Para mostrar un spinner en el botón de confirmar
-
-  // --- PROPIEDADES COMPUTADAS ---
-  // El título del modal cambiará dependiendo de si estamos creando o editando.
+  const contactToDeleteId = ref<string | null>(null)
+  const isDeleting = ref(false) // Spinner
+  
+  // --- COMPUTED PROPERTIES ---
   const modalTitle = computed(() => 
     contactToEdit.value ? 'Editar Contacto' : 'Añadir Nuevo Contacto'
   )
 
-  // --- MÉTODOS ---
-
+  // --- METHODS ---
   async function fetchContacts() {
     isLoading.value = true
     try {
@@ -40,34 +45,39 @@
   }
 
   onMounted(fetchContacts)
-
-  // --- LÓGICA DE MODALES ---
-
-  // Prepara el modal para CREAR un nuevo contacto
+  
+  // --- UPDATE CONTACT METHOD ---
+  function handleContactUpdate(updatedContact: any) {
+    const index = contacts.value.findIndex(c => c.id === updatedContact.id)
+    if (index !== -1) {
+      contacts.value[index] = updatedContact
+    }
+  }  
+  
+  // -- MODALS ---  
   function openCreateModal() {
-    contactToEdit.value = null // Asegura que el formulario esté vacío
+    contactToEdit.value = null
     isFormModalOpen.value = true
   }  
 
-  // Prepara el modal para EDITAR un contacto existente
   function openEditModal(contact: any) {
-    contactToEdit.value = contact // Asigna el contacto a editar
+    contactToEdit.value = contact
     isFormModalOpen.value = true
   }
-
-  // --- LÓGICA DE ENVÍO DE FORMULARIO ---
+  
+  // --- FORM SUBMIT ---
   async function handleFormSubmit(formData: Record<string, any>) {
     try {
       if (contactToEdit.value) {
-        // --- LÓGICA DE UPDATE ---
+        // Update
         const updatedContact = await apiClient.put(`/api/contacts/${contactToEdit.value.id}`, formData)
-        // Actualiza la lista localmente
+        // Local update
         const index = contacts.value.findIndex(c => c.id === updatedContact.id)
         if (index !== -1) {
           contacts.value[index] = updatedContact
         }
       } else {
-        // --- LÓGICA DE CREATE ---
+        // Create
         const newContact = await apiClient.post('/api/contacts', formData)
         contacts.value.unshift(newContact)
       }
@@ -76,16 +86,14 @@
       alert("Error: " + e.message)
     }
   }  
-  
-  // --- LÓGICA DE BORRADO ---
-
-  // 1. Cuando el usuario hace clic en "Eliminar", solo preparamos el modal.
+    
+  // --- DELETE LOGIC ---
+  // Delete modal
   function promptForDelete(contactId: string) {
-    contactToDeleteId.value = contactId // Guardamos el ID
-    isConfirmModalOpen.value = true     // Abrimos el modal de confirmación
+    contactToDeleteId.value = contactId
+    isConfirmModalOpen.value = true
   }
 
-  // 2. Este método se llama solo si el usuario confirma en el modal.
   async function handleConfirmDelete() {
     if (!contactToDeleteId.value) return
     
@@ -93,15 +101,61 @@
     try {
       await apiClient.delete(`/api/contacts/${contactToDeleteId.value}`)
       contacts.value = contacts.value.filter(c => c.id !== contactToDeleteId.value)
-      isConfirmModalOpen.value = false // Cierra el modal de confirmación
+      isConfirmModalOpen.value = false
     } catch (e: any) {
       alert("Error: " + e.message)
     } finally {
       isDeleting.value = false
-      contactToDeleteId.value = null // Limpia el ID guardado
+      contactToDeleteId.value = null
     }
   }
 
+  // --- SORTING ---
+  const sortedContacts = computed(() => {
+    const sorted = [...contacts.value]
+
+    if (sortKey.value) {
+      sorted.sort((a, b) => {
+        // Para un ordenamiento más robusto, maneja nulos y mayúsculas/minúsculas
+        const valA = a[sortKey.value] ?? '' // Usa '' si el valor es null/undefined
+        const valB = b[sortKey.value] ?? ''
+        
+        if (typeof valA === 'string' && typeof valB === 'string') {
+          return sortOrder.value === 'asc' 
+            ? valA.localeCompare(valB) 
+            : valB.localeCompare(valA)
+        }
+        
+        if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1
+        if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1
+        return 0
+      })      
+    }
+
+
+    // if (sortKey.value) {
+    //   sorted.sort((a, b) => {
+    //     const valA = a[sortKey.value]
+    //     const valB = b[sortKey.value]
+        
+    //     if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1
+    //     if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1
+    //     return 0
+    //   })      
+    // }
+
+    return sorted
+  })
+
+  function setSort(key: string) {
+    if (sortKey.value === key) {
+      sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'    
+    } else {
+      sortKey.value = key
+      sortOrder.value = 'asc'
+    }
+  }
+  
 </script>
 
 <template>
@@ -117,47 +171,130 @@
       </div>
     </div>
     
-    <!-- Estado de Carga -->
+    <!-- Loading -->
     <div v-if="isLoading" class="text-center p-10">
       <span class="loading loading-lg loading-spinner text-primary"></span>
     </div>
     
-    <!-- Estado de Error -->
+    <!-- Error -->
     <div v-else-if="error" class="alert alert-error">
       <span>{{ error }}</span>
     </div>
     
-    <!-- Contenido Principal (cuando todo va bien) -->              
-    <div v-else class="overflow-x-auto bg-base-100 rounded-lg shadow">
-      <!-- Si no hay contactos -->
+    <!-- Data wrapper -->              
+    <div v-else class="">
+      <!-- No contacts -->
       <div v-if="contacts.length === 0" class="text-center p-10 border-2 border-dashed rounded-lg">
         <p>Aún no tienes contactos.</p>
         <button class="btn btn-primary mt-4">Añadir el primero</button>
       </div>
-      <!-- Si hay contactos (mostramos una tabla) -->
-      <div v-else class="overflow-x-auto">
-        <table class="table w-full">
-          <thead>
+      <!-- Table with contacts -->
+      <div v-else class="bg-base-100 rounded-lg shadow">
+        <table class="table w-full table-fixed">
+          <thead class="bg-base-300 text-base-content text-sm">
             <tr>
-              <th>Empresa</th>
-              <th>Contacto</th>
+              <!-- <th>
+                <button @click="setSort('companyName')" class="flex items-center gap-2 w-full">
+                  Empresa <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="companyName" />
+                </button>
+              </th> -->
+              <th>
+                <button @click="setSort('companyName')" class="flex items-center justify-between w-full gap-2">
+                  <span>Empresa</span> <!-- Envolvemos el texto en un span -->
+                  <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="companyName" />
+                </button>
+              </th>
+
+              <th>
+                <button @click="setSort('contactName')" class="flex items-center justify-between w-full gap-2">
+                  <span>Contacto</span>
+                  <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="contactName" />
+                </button>
+              </th>
+              
+              
+              <!-- <th>
+                <button @click="setSort('contactName')" class="flex items-center gap-2">
+                  Contacto <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="contactName" />
+                </button>
+              </th>              
+               -->
               <th>Email</th>
-              <th>Estado</th>
-              <th class="text-right">Acciones</th> <!-- Nueva columna -->
+              <th>Sitio Web</th>      
+
+              <th>
+                <button @click="setSort('sector')" class="flex items-center justify-between w-full gap-2">
+                  <span>Sector</span>
+                  <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="sector" />
+                </button>
+              </th>
+
+              <th class="w-[120px]">
+                <button @click="setSort('interestLevel')" class="flex items-center justify-center w-full gap-2">
+                  <span>Interés</span>
+                  <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="interestLevel" />
+                </button>
+              </th>
+
+              <th class="text-center">
+                <button @click="setSort('status')" class="flex items-center justify-center w-full gap-2">
+                  <span>Estado</span>
+                  <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="status" />
+                </button>
+              </th>              
+              
+              <!-- <th class="text-center">
+                <button @click="setSort('sector')" class="flex items-center gap-2">
+                  Sector <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="sector" />
+                </button>
+              </th>
+              <th class="w-[120px]">
+                <button @click="setSort('interestLevel')" class="flex items-center justify-center gap-2 w-full">
+                  Interés <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="interestLevel" />
+                </button>
+              </th>
+              <th class="text-center">
+                <button @click="setSort('status')" class="flex items-center justify-center gap-2 w-full">
+                  Estado <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" currentKey="status" />
+                </button>
+              </th> -->
+              <th class="text-center w-[150px]">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="contact in contacts" :key="contact.id" class="hover">
-              <td>{{ contact.companyName }}</td>
+            <tr v-for="contact in sortedContacts" :key="contact.id" class="hover:bg-base-200 hover">
+              <td><b>{{ contact.companyName }}</b></td>
               <td>{{ contact.contactName }}</td>
-              <td>{{ contact.email }}</td>
-              <td><span class="badge badge-ghost">{{ contact.status }}</span></td>
-              <!-- Nuevos botones de acción -->
-              <td class="text-right space-x-2">
-
-                <button class="btn btn-xs btn-outline" @click="openEditModal(contact)">Editar</button>
-                <!-- <button class="btn btn-xs btn-outline" @click="openEditModal(contact)">Editar</button> -->
-                <button class="btn btn-xs btn-outline btn-error" @click="promptForDelete(contact.id)">Eliminar</button>
+              <td>{{ contact.email }}</td>              
+              <td>{{ contact.website }}</td>
+              <td>{{ contact.sector }}</td>
+              <td class="text-center">
+                <InteractiveInterest
+                  :contact-id="contact.id"
+                  :current-level="contact.interestLevel"
+                  @level-updated="handleContactUpdate"
+                />                
+              </td>               
+              <td class="text-center">
+                <StatusSelector 
+                  :contact-id="contact.id"
+                  :current-status="contact.status"
+                  @status-updated="handleContactUpdate"
+                />
+              </td>
+              <td class="text-center space-x-2">
+                <div v-if="contact.notes && contact.notes.trim() !== ''" class="tooltip tooltip-top" data-tip="Ver notas">
+                  <button class="btn btn-sm btn-square btn-primary" @click="openEditModal(contact)"> <NotepadText color="white":size="20":stroke-width="1.5"/></button>
+                </div>
+                <div class="tooltip" v-else>
+                  <button class="btn btn-sm btn-square btn-disabled"> <NotepadText color="white":size="20":stroke-width="1.5"/></button>
+                </div>                
+                <div class="tooltip tooltip-top" data-tip="Editar">
+                  <button class="btn btn-sm btn-square btn-primary" @click="openEditModal(contact)"> <UserRoundPen color="white":size="20":stroke-width="1.5"/></button>
+                </div>
+                <div class="tooltip tooltip-top" data-tip="Eliminar">
+                  <button class="btn btn-sm btn-square btn-error" @click="promptForDelete(contact.id)"> <Trash2 color="white":size="20":stroke-width="1.5"/></button>
+                </div>
               </td>
             </tr>
           </tbody>

@@ -75,9 +75,9 @@ if (authStore.isAuthenticated) {
         </div>
 
         <!-- Botón de Envío -->
-        <div class="form-control mt-6">
+        <div class="form-control mt-6 w-full">
           <button 
-            class="btn btn-primary" 
+            class="btn btn-primary w-full" 
             type="submit" 
             :disabled="isLoading"
           >

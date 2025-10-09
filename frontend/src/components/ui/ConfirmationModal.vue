@@ -2,7 +2,7 @@
   // --- PROPS ---
   defineProps<{
     title?: string
-    message: string // El mensaje de confirmación es obligatorio
+    message: string 
     confirmText?: string
     cancelText?: string
     isLoading?: boolean
