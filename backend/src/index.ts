@@ -1,14 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 
-// Importamos nuestros routers
 import authRoutes from './routes/auth.routes';
 import companyRoutes from './routes/company.routes';
-// Puedes añadir aquí los routers para 'people', 'activity-logs', etc.
+import personRoutes from './routes/person.routes';
+
 
 // --- INICIALIZACIÓN Y CONFIGURACIÓN ---
 const app = express();
 
+// TODO: URL in env
 const allowedOrigins = [
   'https://admin.sebastiangonzalez.co',
   'http://localhost:5173'
@@ -31,6 +32,7 @@ app.use('/api/auth', authRoutes);
 
 // Rutas de datos (todas protegidas por el middleware dentro del archivo de rutas)
 app.use('/api/companies', companyRoutes);
+app.use('/api/people', personRoutes);
 
 // --- INICIO DEL SERVIDOR ---
 const PORT = process.env.PORT || 3300;

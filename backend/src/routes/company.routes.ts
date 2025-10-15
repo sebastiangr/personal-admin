@@ -4,7 +4,9 @@ import {
   getCompanyById,
   createCompany,
   updateCompany,
-  deleteCompany
+  deleteCompany,
+  assignPersonToCompany,
+  getPeopleInCompany
 } from '../controllers/company.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 
@@ -21,5 +23,9 @@ router.route('/:id')
   .get(getCompanyById)
   .put(updateCompany)
   .delete(deleteCompany);
+
+router.route('/:companyId/people')
+  .get(getPeopleInCompany)
+  .post(assignPersonToCompany);
 
 export default router;

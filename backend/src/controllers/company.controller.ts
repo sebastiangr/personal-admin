@@ -57,7 +57,6 @@ export const updateCompany = async (req: Request, res: Response) => {
 
 export const deleteCompany = async (req: Request, res: Response) => {
   try {
-    // La cláusula where con userId asegura que un usuario no pueda borrar la compañía de otro
     await prisma.company.delete({
       where: { id: req.params.id, userId: getUserId(req) }
     });
@@ -65,4 +64,59 @@ export const deleteCompany = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(404).json({ error: 'Delete failed. Company not found.' });
   }
+};
+
+export const assignPersonToCompany = async (req: Request, res: Response) => {
+  const { companyId } = req.params;
+  const { personId, role } = req.body;
+  const userId = getUserId(req);
+
+  if (!personId) {
+    return res.status(400).json({ error: 'personId is required' });
+  }
+
+  try {    
+    const company = await prisma.company.findFirst({ where: { id: companyId, userId } });
+    const person = await prisma.person.findFirst({ where: { id: personId, userId } });
+
+    if (!company || !person) {
+      return res.status(404).json({ error: 'Company or Person not found, or you do not have permission.' });
+    }
+    
+    const assignment = await prisma.personOnCompany.create({
+      data: {
+        companyId: companyId,
+        personId: personId,
+        role: role,
+      }
+    });
+
+    res.status(201).json(assignment);
+  } catch (error: any) {
+    // Manejar el caso de que la asignación ya exista (error de clave primaria duplicada)
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'This person is already assigned to this company.' });
+    }
+    console.error('Assignment error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getPeopleInCompany = async (req: Request, res: Response) => {
+  const { companyId } = req.params;
+  const userId = getUserId(req);
+    
+  const company = await prisma.company.findFirst({ where: { id: companyId, userId } });
+  if (!company) {
+    return res.status(404).json({ error: 'Company not found or you do not have permission.' });
+  }
+
+  const people = await prisma.personOnCompany.findMany({
+    where: { companyId },
+    include: {
+      person: true // Incluye todos los detalles de la persona
+    }
+  });
+
+  res.json(people.map(p => ({ ...p.person, role: p.role })));
 };
