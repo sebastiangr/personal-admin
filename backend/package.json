@@ -5,13 +5,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "ts-node prisma/seed.ts",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "dotenv -e ../.env -- ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "prisma:migrate": "dotenv -e ../.env -- npx prisma migrate dev",
     "prisma:studio": "dotenv -e ../.env -- npx prisma studio",
     "prisma:generate": "dotenv -e ../.env -- npx prisma generate",
     "db:seed": "dotenv -e ../.env -- npx prisma db seed",
-    "db:seed:direct": "dotenv -e ../.env -- ts-node prisma/seed.ts"
+    "db:seed:direct": "dotenv -e ../.env -- ts-node prisma/seed.ts",
+    "prisma:reset": "dotenv -e ../.env -- npx prisma migrate reset"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

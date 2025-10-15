@@ -9,43 +9,130 @@ datasource db {
 
 // Admin User Model
 model User {
-  id            String   @id @default(uuid())
-  username      String   @unique
-  passwordHash  String
+  id        String    @id @default(uuid())
+  username  String    @unique
+  password  String 
+  
+  companies Company[]
+  people    Person[]
 }
 
-// Contact Model
-model Contact {
-  id             String         @id @default(uuid())
-  companyName    String
-  contactName    String?
-  email          String?
-  website        String?
-  sector         String?
-  notes          String?        @db.Text
-  status         Status         @default(BACKLOG)
-  interestLevel  Int            @default(1) // 1, 2, o 3
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  activityLogs   ActivityLog[] 
+// MAIN DATA MODELS
+model Company {
+  id            String    @id @default(uuid())
+  name          String
+  type          CompanyType @default(AGENCY_STUDIO)
+  country       String?
+  city          String?
+  email         String?
+  website       String?
+  careerWebsite String?
+  linkedinUrl   String?
+  instagramUrl  String?
+  behanceUrl    String?
+  notes         String?   @db.Text
+  interestLevel Int       @default(1)
+  status        Status    @default(TO_CONTACT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+
+  people        PersonOnCompany[]
+  activityLogs  ActivityLog[]
 }
 
-// Activity Model
+model Person {
+  id           String    @id @default(uuid())
+  name         String
+  email        String?
+  linkedinUrl  String?
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  
+  companies    PersonOnCompany[]
+}
+
+model PersonOnCompany {
+  person    Person  @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+  role      String?
+
+  @@id([personId, companyId])
+}
+
 model ActivityLog {
   id                String   @id @default(uuid())
   eventDescription  String
   createdAt         DateTime @default(now())
-  contact           Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  contactId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId         String
 }
 
-// Status Enum
+// --- ENUMS ---
+enum CompanyType {
+  AGENCY_STUDIO
+  TECH_STARTUP
+  SOFTWARE_COMPANY
+  INDUSTRY
+  ECOMMERCE
+  FREELANCE_COLLECTIVE
+}
+
 enum Status {
   BACKLOG
   TO_CONTACT
-  CONTACTED
-  WAITING_RESPONSE
-  IN_CONVERSATION
-  REJECTED
-  HIRED // Soñemos en grande :)
+  WAITING
+  IN_PROGRESS
+  ARCHIVED
+  HIRED
 }
+
+// model User {
+//   id            String   @id @default(uuid())
+//   username      String   @unique
+//   passwordHash  String
+// }
+
+// Contact Model
+// model Contact {
+//   id             String         @id @default(uuid())
+//   companyName    String
+//   contactName    String?
+//   email          String?
+//   website        String?
+//   sector         String?
+//   notes          String?        @db.Text
+//   status         Status         @default(BACKLOG)
+//   interestLevel  Int            @default(1) // 1, 2, o 3
+//   createdAt      DateTime       @default(now())
+//   updatedAt      DateTime       @updatedAt
+//   activityLogs   ActivityLog[] 
+// }
+
+// // Activity Model
+// model ActivityLog {
+//   id                String   @id @default(uuid())
+//   eventDescription  String
+//   createdAt         DateTime @default(now())
+//   contact           Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+//   contactId         String
+// }
+
+// // Status Enum
+// enum Status {
+//   BACKLOG
+//   TO_CONTACT
+//   CONTACTED
+//   WAITING_RESPONSE
+//   IN_CONVERSATION
+//   REJECTED
+//   HIRED // Soñemos en grande :)
+// }
