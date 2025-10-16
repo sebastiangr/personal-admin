@@ -8,6 +8,7 @@ npm-debug.log
 .env.development.local
 .env.test.local
 .env.production.local
+.env.test
 
 # TypeScript comp files
 dist/
@@ -15,7 +16,7 @@ build/
 
 # DB
 *.db
-*.db-journal
+*.db-journalsssss
 
 # Logs
 logs
