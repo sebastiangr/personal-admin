@@ -9,23 +9,23 @@ import {
   getPeopleInCompany
 } from '../controllers/company.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
+import { createCompanySchema, updateCompanySchema, assignPersonSchema } from '../lib/schemas';
+import { validate } from '../middlewares/validation.middleware';
 
 const router = Router();
-
-// Aplica el middleware a TODAS las rutas de este archivo
 router.use(authenticateToken); 
 
 router.route('/')
   .get(getAllCompanies)
-  .post(createCompany);
+  .post(validate(createCompanySchema),createCompany);
 
 router.route('/:id')
   .get(getCompanyById)
-  .put(updateCompany)
+  .put(validate(updateCompanySchema),updateCompany)
   .delete(deleteCompany);
 
 router.route('/:companyId/people')
   .get(getPeopleInCompany)
-  .post(assignPersonToCompany);
+  .post(validate(assignPersonSchema),assignPersonToCompany);
 
 export default router;
