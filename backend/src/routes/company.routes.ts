@@ -9,7 +9,7 @@ import {
   getPeopleInCompany
 } from '../controllers/company.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
-import { createCompanySchema, updateCompanySchema, assignPersonSchema } from '../lib/schemas';
+import { createCompanySchema, updateCompanySchema, assignPersonSchema, idParamSchema } from '../lib/schemas';
 import { validate } from '../middlewares/validation.middleware';
 
 const router = Router();
@@ -19,10 +19,10 @@ router.route('/')
   .get(getAllCompanies)
   .post(validate(createCompanySchema),createCompany);
 
-router.route('/:id')
-  .get(getCompanyById)
-  .put(validate(updateCompanySchema),updateCompany)
-  .delete(deleteCompany);
+router.route('/:companyId')
+  .get(validate(idParamSchema, 'params'),getCompanyById)
+  .put(validate(idParamSchema, 'params'),validate(updateCompanySchema),updateCompany)
+  .delete(validate(idParamSchema, 'params'),deleteCompany);
 
 router.route('/:companyId/people')
   .get(getPeopleInCompany)

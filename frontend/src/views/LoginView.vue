@@ -1,56 +1,57 @@
-<!-- src/views/LoginView.vue -->
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth' // El alias '@/' apunta a 'src/'
+  import { ref, onMounted } from 'vue'
+  import { RouterLink, useRouter, useRoute } from 'vue-router'
+  import { useAuthStore } from '@/stores/auth'
 
-// --- LÓGICA DEL COMPONENTE ---
+  const router = useRouter()
+  const route = useRoute()
+  const authStore = useAuthStore()
 
-const router = useRouter()
-const authStore = useAuthStore()
+  const username = ref('admin')
+  const password = ref('admin')
+  const errorMessage = ref<string | null>(null)
+  const successMessage = ref<string | null>(null)
+  const isLoading = ref(false)
+  
+  onMounted(() => {
+    if (route.query.registered === 'true') {
+      successMessage.value = '¡Registro exitoso! Por favor, inicia sesión.'
+    }
+  })
 
-// Estado reactivo para el formulario y el UI
-const username = ref('admin') // Relleno previo para pruebas
-const password = ref('admin')
-const errorMessage = ref<string | null>(null)
-const isLoading = ref(false)
-
-async function handleLogin() {
-  isLoading.value = true
-  errorMessage.value = null
-  try {
-    await authStore.login(username.value, password.value)
-    
-    // ¡Login exitoso! Redirigimos a la app principal.
-    router.push('/app/contacts') 
-    
-  } catch (error) {
-    // Manejo de errores de la API o de la red.
-    errorMessage.value = 'Usuario o contraseña inválidos o error de conexión.'
-  } finally {
-    isLoading.value = false
+  async function handleLogin() {
+    isLoading.value = true
+    errorMessage.value = null
+    successMessage.value = null
+    try {
+      await authStore.login(username.value, password.value)
+      router.push({ name: 'companies' })
+    } catch (error) {
+      errorMessage.value = 'Usuario o contraseña inválidos.'
+    } finally {
+      isLoading.value = false
+    }
   }
-}
 
-// Si el usuario ya está autenticado (ej: viene de otra URL), lo enviamos al app.
-if (authStore.isAuthenticated) {
-  router.push('/app/contacts')
-}
+  if (authStore.isAuthenticated) {
+    router.push('/app/companies')
+  }
 </script>
 
-<template>
-  <!-- ESTRUCTURA HTML (Utiliza DaisyUI y Tailwind para el responsive) -->
-  <div class="flex items-center justify-center min-h-screen bg-sky-300 p-4">
+<template>  
+
+  <div class="flex items-center justify-center min-h-screen bg-base-200 p-4">
     <div class="card w-full max-w-sm shrink-0 bg-base-100 shadow-xl border border-base-300">
-      <form class="card-body p-10" @submit.prevent="handleLogin">
+      <form class="card-body" @submit.prevent="handleLogin">
         <h1 class="card-title text-2xl mb-4 text-center block">Personal Admin</h1>
         
-        <!-- Mensaje de Error (v-if para mostrar/ocultar) -->
-        <div v-if="errorMessage" class="alert alert-error text-sm">
-            {{ errorMessage }}
+        <div v-if="successMessage" class="alert alert-success text-sm">
+          <span>{{ successMessage }}</span>
         </div>
-        
-        <!-- Campo de Usuario -->
+        <div v-if="errorMessage" class="alert alert-error text-sm">
+          <span>{{ errorMessage }}</span>
+        </div>
+                
         <div class="form-control">
           <label class="label"><span class="label-text">Usuario</span></label>
           <input 
@@ -60,9 +61,8 @@ if (authStore.isAuthenticated) {
             class="input input-bordered w-full" 
             required 
           />
-        </div>
-
-        <!-- Campo de Contraseña -->
+        </div>      
+        
         <div class="form-control">
           <label class="label"><span class="label-text">Contraseña</span></label>
           <input 
@@ -72,23 +72,25 @@ if (authStore.isAuthenticated) {
             class="input input-bordered w-full" 
             required 
           />
-        </div>
-
-        <!-- Botón de Envío -->
-        <div class="form-control mt-6 w-full">
-          <button 
-            class="btn btn-primary w-full" 
-            type="submit" 
-            :disabled="isLoading"
-          >
-            <!-- v-if/v-else para alternar el texto y el spinner -->
+        </div>        
+        
+        <div class="form-control mt-6">
+          <button class="btn btn-primary" type="submit" :disabled="isLoading">
             <span v-if="isLoading" class="loading loading-spinner"></span>
             <span v-else>Iniciar Sesión</span>
           </button>
         </div>
+        
+        <div class="text-center mt-4 text-sm">
+          ¿No tienes una cuenta?
+          <RouterLink :to="{ name: 'register' }" class="link link-primary">
+            Regístrate aquí
+          </RouterLink>
+        </div>
       </form>
     </div>
   </div>
+
 </template>
 
 <style scoped>

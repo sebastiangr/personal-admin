@@ -1,9 +1,7 @@
 // src/stores/auth.ts
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-
-// NOTA: No usamos useRouter aquí para evitar problemas de acoplamiento.
-// La redirección la manejaremos en el componente o el router global.
+import apiClient from '@/utils/api'
 
 export const useAuthStore = defineStore('auth', () => {
   // --- STATE ---
@@ -29,27 +27,32 @@ export const useAuthStore = defineStore('auth', () => {
    * Intenta hacer login llamando a la API.
    */
   async function login(username: string, password: string) {
-    const LOGIN_URL = 'https://api.sebastiangonzalez.co/auth/login' // <-- AJUSTA TU URL AQUÍ
-
-    const response = await fetch(LOGIN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    })
-
-    if (!response.ok) {
-      // Si el código de estado no es 2xx, lanza un error.
-      throw new Error('Invalid credentials')
+    try {
+      const data = await apiClient.post('/auth/login', { username, password })
+      setToken(data.token)
+    } catch (error) {
+      console.log('Login error en el store:', error)
+      throw error
     }
 
-    const data = await response.json()
-    setToken(data.token)
+    // const LOGIN_URL = 'https://api.sebastiangonzalez.co/auth/login' // <-- AJUSTA TU URL AQUÍ
+
+    // const response = await fetch(LOGIN_URL, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ username, password }),
+    // })
+
+    // if (!response.ok) {
+    //   // Si el código de estado no es 2xx, lanza un error.
+    //   throw new Error('Invalid credentials')
+    // }
+
+    // const data = await response.json()
+    // setToken(data.token)
     // No redirigimos aquí. La vista será responsable de la navegación.
   }
 
-  /**
-   * Cierra la sesión del usuario.
-   */
   function logout() {
     token.value = null
     localStorage.removeItem('authToken')

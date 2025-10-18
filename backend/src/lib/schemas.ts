@@ -4,6 +4,10 @@ import { z } from 'zod';
 export const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters long"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
+  confirmPassword: z.string().min(6, "Confirm Password must be at least 6 characters long"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 export const loginSchema = z.object({
@@ -16,22 +20,26 @@ export const loginSchema = z.object({
 import { CompanyType, Status } from '@prisma/client';
 
 export const createCompanySchema = z.object({
-  name: z.string().min(1, "Company name is required"),
+  name: z.string().trim().min(1, "Company name is required"),
   type: z.enum(CompanyType).optional(),
-  country: z.string().optional(),
-  city: z.string().optional(),
+  country: z.string().trim().optional(),
+  city: z.string().trim().optional(),
   email: z.email("Invalid email address").optional().or(z.literal('')),
   website: z.url("Invalid URL").optional().or(z.literal('')),
   careerWebsite: z.url("Invalid URL").optional().or(z.literal('')),
   linkedinUrl: z.url("Invalid URL").optional().or(z.literal('')),
   instagramUrl: z.url("Invalid URL").optional().or(z.literal('')),
   behanceUrl: z.url("Invalid URL").optional().or(z.literal('')),
-  notes: z.string().optional(),
+  notes: z.string().trim().optional(),
   interestLevel: z.number().int().min(1).max(3).optional(),
   status: z.enum(Status).optional(),
 });
 
 export const updateCompanySchema = createCompanySchema.partial();
+
+export const idParamSchema = z.object({
+  companyId: z.string().uuid("Invalid Company ID format"),
+});
 
 
 // --- Person Schema ---

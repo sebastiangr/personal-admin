@@ -1,36 +1,39 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import LoginView from '@/views/LoginView.vue'
+import RegisterView from '@/views/RegisterView.vue'
 
-const ContactsView = () => import('@/views/app/ContactsView.vue')
-const HistoryView = () => import('@/views/app/HistoryView.vue')
+// const CompaniesView = () => import('@/views/app/CompaniesView.vue')
+// const HistoryView = () => import('@/views/app/HistoryView.vue')
+
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', redirect: '/app/contacts' },
+    { path: '/', redirect: '/app/companies' },
     { path: '/login', name: 'login', component: LoginView },
+    { path: '/register', name: 'register', component: RegisterView },
     
     // --- RUTAS PROTEGIDAS ---
     {
       path: '/app',
       name: 'app',
-      redirect: '/app/contacts',
-      // Este es el layout principal de la aplicación, donde irá el Navbar/Sidebar
+      redirect: '/app/companies',      
       component: () => import('@/views/AppLayout.vue'),
       children: [
         {
-          path: 'contacts',
-          name: 'contacts',
-          component: ContactsView,
+          path: 'companies',
+          name: 'companies',          
+          component: () => import('@/views/app/CompaniesView.vue'), // ¡Apunta al nuevo archivo!
           meta: { requiresAuth: true }
         },
-        {
-          path: 'history',
-          name: 'history',
-          component: HistoryView,
-          meta: { requiresAuth: true }
-        },
+        // {
+        //   path: 'history',
+        //   name: 'history',
+        //   component: HistoryView,
+        //   meta: { requiresAuth: true }
+        // },
         // ... otras rutas protegidas
       ]
     },

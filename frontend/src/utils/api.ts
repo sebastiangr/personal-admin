@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/stores/auth'
 
-const BASE_URL = 'https://api.sebastiangonzalez.co' // Tu URL base de la API
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3300'
 
 /**
  * Una función wrapper para el 'fetch' nativo que se encarga de:
@@ -33,7 +33,27 @@ async function apiClient(endpoint: string, options: RequestInit = {}) {
   }
 
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, finalOptions)
+    // const response = await fetch(`${BASE_URL}${endpoint}`, finalOptions)
+    // const url = `${BASE_URL}/api${endpoint}`;
+    // --- CONSTRUCCIÓN DE URL ROBUSTA ---
+
+    // 1. Limpia la URL base para que NUNCA tenga una barra al final.
+    const cleanBase = BASE_URL.replace(/\/$/, '');
+
+    // 2. Limpia el prefijo de la API para que NUNCA tenga una barra al principio.
+    const apiPrefix = 'api'; 
+
+    // 3. Limpia el endpoint para que SIEMPRE tenga una barra al principio.
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+    // 4. Une las tres partes. El resultado siempre será correcto.
+    // Ej: "http://localhost:3300" + "/api" + "/auth/register"
+    const url = `${cleanBase}/${apiPrefix}${cleanEndpoint}`;
+
+    // --- FIN DE LA CONSTRUCCIÓN DE URL ---
+
+    const response = await fetch(url, finalOptions);
+
     
     if (response.status === 204) {
       return null;

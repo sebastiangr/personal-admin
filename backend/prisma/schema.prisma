@@ -17,7 +17,7 @@ model User {
   people    Person[]
 }
 
-// MAIN DATA MODELS
+// Main Data Models
 model Company {
   id            String    @id @default(uuid())
   name          String
@@ -94,45 +94,3 @@ enum Status {
   ARCHIVED
   HIRED
 }
-
-// model User {
-//   id            String   @id @default(uuid())
-//   username      String   @unique
-//   passwordHash  String
-// }
-
-// Contact Model
-// model Contact {
-//   id             String         @id @default(uuid())
-//   companyName    String
-//   contactName    String?
-//   email          String?
-//   website        String?
-//   sector         String?
-//   notes          String?        @db.Text
-//   status         Status         @default(BACKLOG)
-//   interestLevel  Int            @default(1) // 1, 2, o 3
-//   createdAt      DateTime       @default(now())
-//   updatedAt      DateTime       @updatedAt
-//   activityLogs   ActivityLog[] 
-// }
-
-// // Activity Model
-// model ActivityLog {
-//   id                String   @id @default(uuid())
-//   eventDescription  String
-//   createdAt         DateTime @default(now())
-//   contact           Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
-//   contactId         String
-// }
-
-// // Status Enum
-// enum Status {
-//   BACKLOG
-//   TO_CONTACT
-//   CONTACTED
-//   WAITING_RESPONSE
-//   IN_CONVERSATION
-//   REJECTED
-//   HIRED // Soñemos en grande :)
-// }

@@ -12,8 +12,9 @@ export const getAllCompanies = async (req: Request, res: Response) => {
 };
 
 export const getCompanyById = async (req: Request, res: Response) => {
+  const { companyId } = req.params;
   const company = await prisma.company.findFirst({
-    where: { id: req.params.id, userId: getUserId(req) }
+    where: { id: companyId, userId: getUserId(req) }
   });
   if (!company) return res.status(404).json({ error: 'Company not found' });
   res.json(company);
@@ -30,39 +31,66 @@ export const createCompany = async (req: Request, res: Response) => {
 };
 
 export const updateCompany = async (req: Request, res: Response) => {
+  const { companyId } = req.params;
+  const userId = getUserId(req);
+  const dataToUpdate = req.body;
+
   try {
-    const companyId = req.params.id;
-    const userId = getUserId(req);
-
-    const oldCompany = await prisma.company.findFirst({
-      where: { id: companyId, userId }
-    });
-    if (!oldCompany) return res.status(404).json({ error: 'Company not found' });
-
-    const updatedCompany = await prisma.company.update({
-      where: { id: companyId },
-      data: req.body
-    });
-
-    if (req.body.status && oldCompany.status !== req.body.status) {
-      await prisma.activityLog.create({
-        data: { eventDescription: `Estado cambiado de ${oldCompany.status} a ${req.body.status}.`, companyId }
+    
+    const updatedCompany = await prisma.$transaction(async (tx) => {
+      
+      const oldCompany = await tx.company.findFirst({
+        where: { id: companyId, userId },
+        select: { status: true }
       });
-    }
-    res.json(updatedCompany);
-  } catch (error) {
-    res.status(404).json({ error: 'Update failed. Company not found.' });
+      
+      if (!oldCompany) {        
+        throw new Error('COMPANY_NOT_FOUND');
+      }
+      
+      const company = await tx.company.update({
+        where: { id: companyId },
+        data: dataToUpdate,
+      });
+      
+      if (dataToUpdate.status && oldCompany.status !== dataToUpdate.status) {
+        await tx.activityLog.create({
+          data: {
+            eventDescription: `Estado cambiado de ${oldCompany.status} a ${dataToUpdate.status}.`,
+            companyId: companyId,
+          }
+        });
+      }
+      
+      return company;
+    });
+
+    res.json(updatedCompany);    
+  } catch (error: any) {    
+    if (error.message === 'COMPANY_NOT_FOUND') {
+      return res.status(404).json({ error: 'Company not found or you do not have permission' });
+    }                    
+    if (error.code === 'P2025') {      
+      return res.status(404).json({ error: 'Company not found or you do not have permission' });
+    }    
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const deleteCompany = async (req: Request, res: Response) => {
+  const { companyId } = req.params;
+  const userId = getUserId(req);
+  
   try {
     await prisma.company.delete({
-      where: { id: req.params.id, userId: getUserId(req) }
+      where: { id: companyId, userId: userId }
     });
     res.status(204).send();
-  } catch (error) {
-    res.status(404).json({ error: 'Delete failed. Company not found.' });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Company not found or you do not have permission' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -76,28 +104,23 @@ export const assignPersonToCompany = async (req: Request, res: Response) => {
   }
 
   try {    
-    const company = await prisma.company.findFirst({ where: { id: companyId, userId } });
-    const person = await prisma.person.findFirst({ where: { id: personId, userId } });
+    const [company, person] = await Promise.all([
+      prisma.company.findFirst({ where: { id: companyId, userId } }),
+      prisma.person.findFirst({ where: { id: personId, userId } })
+    ]);
 
     if (!company || !person) {
       return res.status(404).json({ error: 'Company or Person not found, or you do not have permission.' });
     }
-    
-    const assignment = await prisma.personOnCompany.create({
-      data: {
-        companyId: companyId,
-        personId: personId,
-        role: role,
-      }
-    });
 
-    res.status(201).json(assignment);
-  } catch (error: any) {
-    // Manejar el caso de que la asignación ya exista (error de clave primaria duplicada)
+    const assignment = await prisma.personOnCompany.create({
+      data: { companyId, personId, role }
+    });
+    res.status(201).json(assignment);      
+  } catch (error: any) {    
     if (error.code === 'P2002') {
       return res.status(409).json({ error: 'This person is already assigned to this company.' });
-    }
-    console.error('Assignment error:', error);
+    }    
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -114,7 +137,7 @@ export const getPeopleInCompany = async (req: Request, res: Response) => {
   const people = await prisma.personOnCompany.findMany({
     where: { companyId },
     include: {
-      person: true // Incluye todos los detalles de la persona
+      person: true
     }
   });
 

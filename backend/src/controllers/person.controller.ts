@@ -30,8 +30,7 @@ export const getPersonById = async (req: Request, res: Response) => {
 };
 
 export const createPerson = async (req: Request, res: Response) => {
-  const { name, email, linkedinUrl, notes } = req.body;
-  if (!name) return res.status(400).json({ error: 'Name is required' });
+  const { name, email, linkedinUrl, notes } = req.body;  
 
   const newPerson = await prisma.person.create({
     data: {
@@ -61,8 +60,11 @@ export const updatePerson = async (req: Request, res: Response) => {
     });
 
     res.json(updatedPerson);
-  } catch (error) {
-    res.status(404).json({ error: 'Update failed. Person not found.' });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Person not found or you do not have permission.' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -72,7 +74,10 @@ export const deletePerson = async (req: Request, res: Response) => {
       where: { id: req.params.id, userId: getUserId(req) }
     });
     res.status(204).send();
-  } catch (error) {
-    res.status(404).json({ error: 'Delete failed. Person not found.' });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+        return res.status(404).json({ error: 'Person not found or you do not have permission.' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

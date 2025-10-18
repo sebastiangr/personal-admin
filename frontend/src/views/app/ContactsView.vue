@@ -2,7 +2,7 @@
   import { ref, onMounted, computed } from 'vue'
   import apiClient from '@/utils/api'
   import Modal from '@/components/ui/Modal.vue'
-  import ContactForm from '@/components/ContactForm.vue'
+  import ContactForm from '@/components/CompanyForm.vue'
   import ConfirmationModal from '@/components/ui/ConfirmationModal.vue'
   import InterestIndicator from '@/components/ui/InterestIndicator.vue'
   import InteractiveInterest from '@/components/InteractiveInterest.vue'
