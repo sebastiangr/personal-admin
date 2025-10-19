@@ -16,18 +16,21 @@ async function main() {
   if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET is not defined in environment variables.');
   }
+  if (!process.env.FRONTEND_URL) {
+    throw new Error('FRONTEND_URL is not defined');
+  }
 
   const app = express();
-  const allowedOrigins = [
-    'https://admin.sebastiangonzalez.co',
-    'http://localhost:5173' // For development purposes
+  const allowedOrigins = [    
+    'http://localhost:5173', // For development purposes
+    process.env.FRONTEND_URL 
   ];
   app.use(cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {      
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+      } else {        
+        callback(new Error(`Origin'${origin}' not allowed by CORS.`));
       }
     }
   }));

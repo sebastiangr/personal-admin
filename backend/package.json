@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "@prisma/client": "^6.16.3",
-    "test": "dotenv -e ../.env.test -- vitest run --setup-files ./vitest.setup.ts",
+    "test": "dotenv -e ../.env.test -- vitest run",
     "seed": "ts-node prisma/seed.ts",
     "dev": "dotenv -e ../.env -- ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",

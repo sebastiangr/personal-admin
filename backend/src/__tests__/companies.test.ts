@@ -1,5 +1,3 @@
-// src/__tests__/companies.test.ts
-
 import { describe, it, expect, beforeAll } from 'vitest';
 import supertest from 'supertest';
 import express from 'express';
@@ -8,25 +6,44 @@ import authRoutes from '../routes/auth.routes';
 import companyRoutes from '../routes/company.routes';
 import { authenticateToken } from '../middlewares/auth.middleware';
 
-// 1. Crear una instancia de Express que simule la aplicación real
 const app = express();
 app.use(express.json());
 app.use('/api/auth', authRoutes);
-// 2. ¡CRÍTICO! Proteger las rutas de compañías con el middleware
 app.use('/api/companies', authenticateToken, companyRoutes); 
 
 const request = supertest(app);
 
-// 3. Usar 'describe.sequential' para garantizar el orden de ejecución del CRUD
 describe.sequential('Company Endpoints CRUD Flow', () => {
   let token: string;
   let companyId: string;
+  
+  beforeAll(async () => {    
+    execSync('npx prisma migrate reset --force --skip-seed');
+        
+    await request
+      .post('/api/auth/register')
+      .send({ 
+        username: 'testuser-companies', 
+        password: 'password123', 
+        confirmPassword: 'password123'
+      });
 
-  beforeAll(async () => {
-    await request.post('/api/auth/register').send({ username: 'user-co', password: 'password' });
-    const loginRes = await request.post('/api/auth/login').send({ username: 'user-co', password: 'password' });
+    const loginRes = await request
+      .post('/api/auth/login')
+      .send({ username: 'testuser-companies', password: 'password123' });
+        
     token = loginRes.body.token;
   }, 20000);
+
+
+  it('should fail to create a company without a name (400 Bad Request)', async () => {
+    const response = await request
+      .post('/api/companies')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ status: 'BACKLOG' }); // Sin 'name'
+      
+    expect(response.status).toBe(400);
+  });
 
   it('should start with an empty array of companies', async () => {
     const response = await request
