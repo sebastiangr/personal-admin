@@ -17,11 +17,12 @@ export const loginSchema = z.object({
 
 
 // --- Company Schema ---
-import { CompanyType, Status } from '@prisma/client';
+const companyTypes = ['AGENCY_STUDIO', 'TECH_STARTUP', 'SOFTWARE_COMPANY', 'INDUSTRY', 'ECOMMERCE', 'FREELANCE_COLLECTIVE'] as const;
+const statuses = ['BACKLOG', 'TO_CONTACT', 'WAITING', 'IN_PROGRESS', 'ARCHIVED', 'HIRED'] as const;
 
 export const createCompanySchema = z.object({
   name: z.string().trim().min(1, "Company name is required"),
-  type: z.enum(CompanyType).optional(),
+  type: z.enum(companyTypes).optional(),
   country: z.string().trim().optional(),
   city: z.string().trim().optional(),
   email: z.email("Invalid email address").optional().or(z.literal('')),
@@ -32,7 +33,7 @@ export const createCompanySchema = z.object({
   behanceUrl: z.url("Invalid URL").optional().or(z.literal('')),
   notes: z.string().trim().optional(),
   interestLevel: z.number().int().min(1).max(3).optional(),
-  status: z.enum(Status).optional(),
+  status: z.enum(statuses).optional(),
 });
 
 export const updateCompanySchema = createCompanySchema.partial();

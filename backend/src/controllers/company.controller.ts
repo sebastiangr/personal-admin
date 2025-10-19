@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/db';
+import type { Prisma } from '@prisma/client';
 
 const getUserId = (req: Request) => req.user!.userId;
 
@@ -37,7 +38,7 @@ export const updateCompany = async (req: Request, res: Response) => {
 
   try {
     
-    const updatedCompany = await prisma.$transaction(async (tx) => {
+    const updatedCompany = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       
       const oldCompany = await tx.company.findFirst({
         where: { id: companyId, userId },
@@ -141,5 +142,8 @@ export const getPeopleInCompany = async (req: Request, res: Response) => {
     }
   });
 
-  res.json(people.map(p => ({ ...p.person, role: p.role })));
+  res.json(people.map((p: { person: any; role: string | null }) => ({ 
+    ...p.person, 
+    role: p.role 
+  })));
 };
