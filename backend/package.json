@@ -14,10 +14,12 @@
     "prisma:generate": "dotenv -e ../.env -- npx prisma generate",
     "db:seed": "dotenv -e ../.env -- npx prisma db seed",
     "db:seed:direct": "dotenv -e ../.env -- ts-node prisma/seed.ts",
-    "prisma:reset": "dotenv -e ../.env -- npx prisma migrate reset"
+    "prisma:reset": "dotenv -e ../.env -- npx prisma migrate reset",
+    "seed:dev": "ts-node prisma/seed.ts",
+    "seed:prod": "node dist/prisma/seed.js"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "node dist/prisma/seed.js"
   },
   "keywords": [],
   "author": "",
