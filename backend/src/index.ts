@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import bodyParser from 'body-parser';
 import express, { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -36,7 +37,8 @@ async function main() {
   }));
 
   app.use(morgan('dev'));
-  app.use(express.json());
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));  
 
   // --- ROUTES ---
   app.use('/api/auth', authRoutes);
@@ -50,7 +52,7 @@ async function main() {
   app.use(errorHandler);
 
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3300;
-  const HOST = '127.0.0.1';
+  const HOST = '0.0.0.0';
 
   try {
     await prisma.$connect();
