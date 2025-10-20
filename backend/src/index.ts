@@ -40,6 +40,10 @@ async function main() {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));  
 
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   // --- ROUTES ---
   app.use('/api/auth', authRoutes);
   app.use('/api/companies', companyRoutes);

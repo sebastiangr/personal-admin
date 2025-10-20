@@ -1,47 +1,44 @@
-# Dockerfile for the backend service
-# --- Etapa 1: Build ---
-# Usamos una imagen completa de Node para la compilación
+# --- Etapa 1: Build Dependencies & Source Code ---
 FROM node:20-alpine AS builder
 
-# Establecemos el directorio de trabajo
 WORKDIR /app
 
-# Copiamos los archivos de dependencias
+# Copia solo los archivos de manifiesto e instala TODAS las dependencias
 COPY package*.json ./
-
-# Instalamos TODAS las dependencias para poder compilar
 RUN npm install
 
-# Copiamos el resto del código fuente
+# Copia el resto del código
 COPY . .
 
-# Generamos el cliente de Prisma
-RUN npx prisma generate
-
-# Compilamos el código TypeScript a JavaScript en la carpeta /dist
+# Compila el código TypeScript a JavaScript
 RUN npm run build
 
 
-# --- Etapa 2: Producción ---
-# Empezamos desde una imagen limpia y ligera
+# --- Etapa 2: Production Image ---
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copiamos las dependencias de producción desde la etapa 'builder'
-COPY --from=builder /app/node_modules ./node_modules
-
-# Copiamos el package.json (necesario para 'npm start')
+# Copia los archivos de manifiesto de nuevo
 COPY package*.json ./
 
-# Copiamos el schema de Prisma (necesario para las migraciones en producción)
+# ¡CLAVE! Instala SOLO las dependencias de producción.
+# Esto asegura que cualquier binario nativo (como el de Prisma)
+# se descargue para el entorno final correcto (Alpine Linux en ARM).
+RUN npm install --only=production
+
+# Copia el schema de Prisma desde el builder
 COPY --from=builder /app/prisma ./prisma
 
-# Copiamos el código JavaScript compilado desde la etapa 'builder'
+# Copia el código JavaScript compilado desde el builder
 COPY --from=builder /app/dist ./dist
 
-# Exponemos el puerto en el que la aplicación escucha
+# ¡CLAVE! Vuelve a generar el cliente de Prisma en el entorno final.
+# Esto lo vincula con el binario correcto que se acaba de instalar.
+RUN npx prisma generate
+
+# Expone el puerto que la aplicación usa internamente
 EXPOSE 3000
 
-# El comando para iniciar la aplicación de producción
-CMD ["node", "dist/src/index.js"]
+# El comando de inicio no cambia
+CMD ["node", "dist/index.js"]
