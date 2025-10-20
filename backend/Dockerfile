@@ -18,8 +18,6 @@ COPY . .
 # Generamos el cliente de Prisma
 RUN npx prisma generate
 
-RUN npx tsc prisma/seed.ts --outDir dist/prisma
-
 # Compilamos el código TypeScript a JavaScript en la carpeta /dist
 RUN npm run build
 
@@ -41,10 +39,9 @@ COPY --from=builder /app/prisma ./prisma
 
 # Copiamos el código JavaScript compilado desde la etapa 'builder'
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/dist/prisma/seed.js ./dist/prisma/seed.js
 
 # Exponemos el puerto en el que la aplicación escucha
 EXPOSE 3000
 
 # El comando para iniciar la aplicación de producción
-CMD ["npm", "run", "start"]
+CMD ["node", "dist/src/index.js"]
