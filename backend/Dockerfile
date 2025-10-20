@@ -1,30 +1,47 @@
 # Dockerfile for the backend service
+# --- Etapa 1: Build ---
+# Usamos una imagen completa de Node para la compilación
+FROM node:20-alpine AS builder
 
-# 1. Base Image: 
-FROM node:20-alpine
-
-# 2. Working Directory: 
+# Establecemos el directorio de trabajo
 WORKDIR /app
 
-# 3. Copy package files: 
+# Copiamos los archivos de dependencias
 COPY package*.json ./
 
-# 4. Install Dependencies: 
-RUN npm install --only=production
+# Instalamos TODAS las dependencias para poder compilar
+RUN npm install
 
-# 5. Copy App Source Code: 
+# Copiamos el resto del código fuente
 COPY . .
 
-# 6. Build TypeScript to JavaScript: 
-RUN npm install
-RUN npm run build
-# RUN npm prune --production
-
-# 7. Generate Prisma Client: 
+# Generamos el cliente de Prisma
 RUN npx prisma generate
 
-# 8. Expose Port: 
+# Compilamos el código TypeScript a JavaScript en la carpeta /dist
+RUN npm run build
+
+
+# --- Etapa 2: Producción ---
+# Empezamos desde una imagen limpia y ligera
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiamos las dependencias de producción desde la etapa 'builder'
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copiamos el package.json (necesario para 'npm start')
+COPY package*.json ./
+
+# Copiamos el schema de Prisma (necesario para las migraciones en producción)
+COPY --from=builder /app/prisma ./prisma
+
+# Copiamos el código JavaScript compilado desde la etapa 'builder'
+COPY --from=builder /app/dist ./dist
+
+# Exponemos el puerto en el que la aplicación escucha
 EXPOSE 3000
 
-# 9. Start Command: El comando que se ejecutará cuando el contenedor inicie. Ejecutamos el código compilado.
-CMD ["node", "dist/index.js"]
+# El comando para iniciar la aplicación de producción
+CMD ["npm", "run", "start"]
