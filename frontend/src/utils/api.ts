@@ -2,6 +2,17 @@ import { useAuthStore } from '@/stores/auth'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3300'
 
+class ApiError extends Error {
+  status: number;
+  data: any;
+
+  constructor(message: string, status: number, data: any) {
+    super(message);
+    this.status = status;
+    this.data = data;
+  }
+}
+
 /**
  * Una función wrapper para el 'fetch' nativo que se encarga de:
  * 1. Añadir la URL base a cada petición.
@@ -53,7 +64,6 @@ async function apiClient(endpoint: string, options: RequestInit = {}) {
     // --- FIN DE LA CONSTRUCCIÓN DE URL ---
 
     const response = await fetch(url, finalOptions);
-
     
     if (response.status === 204) {
       return null;
@@ -63,7 +73,8 @@ async function apiClient(endpoint: string, options: RequestInit = {}) {
     if (!response.ok) {
       // Intentamos obtener más detalles del error desde el cuerpo de la respuesta
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.message || `Error: ${response.status} ${response.statusText}`)
+      // throw new Error(errorData.message || `Error: ${response.status} ${response.statusText}`)
+      throw new ApiError(errorData.error || `Error: ${response.status}`, response.status, errorData);
     }
     
     // Si la respuesta es OK, devolvemos los datos en formato JSON
@@ -71,8 +82,11 @@ async function apiClient(endpoint: string, options: RequestInit = {}) {
 
   } catch (error) {
     console.error('API Client Error:', error)
+    if (error instanceof ApiError) {
+      throw error;
+    }    
     // Re-lanzamos el error para que el componente que hizo la llamada pueda manejarlo
-    throw error
+    throw new ApiError((error as Error)?.message || 'Unknown error', 0, {});
   }
 }
 
