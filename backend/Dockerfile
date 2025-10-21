@@ -48,4 +48,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # El CMD no cambia, pero ahora apunta al código que funcionará
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/src/index.js"]
