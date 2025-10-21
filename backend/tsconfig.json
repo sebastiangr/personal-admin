@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "target": "es6",
-    "moduleResolution": "node",
+    "module": "NodeNext", // <-- CAMBIO 1: Usa el sistema de módulos moderno
+    "moduleResolution": "NodeNext", // <-- CAMBIO 2: Usa la estrategia de resolución moderna
+    "target": "ES2022", // Un objetivo moderno acorde
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true
+    
+    // Opciones necesarias para la interoperabilidad y robustez
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
