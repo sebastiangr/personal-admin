@@ -1,44 +1,27 @@
-# --- Etapa 1: Build Dependencies & Source Code ---
+# --- Etapa 1: Build ---
 FROM node:20-alpine AS builder
-
 WORKDIR /app
-
-# Copia solo los archivos de manifiesto e instala TODAS las dependencias
 COPY package*.json ./
 RUN npm install
-
-# Copia el resto del código
 COPY . .
-
-# Compila el código TypeScript a JavaScript
-RUN npm run build
-
-
-# --- Etapa 2: Production Image ---
-FROM node:20-alpine
-
-WORKDIR /app
-
-# Copia los archivos de manifiesto de nuevo
-COPY package*.json ./
-
-# ¡CLAVE! Instala SOLO las dependencias de producción.
-# Esto asegura que cualquier binario nativo (como el de Prisma)
-# se descargue para el entorno final correcto (Alpine Linux en ARM).
-RUN npm install --only=production
-
-# Copia el schema de Prisma desde el builder
-COPY --from=builder /app/prisma ./prisma
-
-# Copia el código JavaScript compilado desde el builder
-COPY --from=builder /app/dist ./dist
-
-# ¡CLAVE! Vuelve a generar el cliente de Prisma en el entorno final.
-# Esto lo vincula con el binario correcto que se acaba de instalar.
 RUN npx prisma generate
 
-# Expone el puerto que la aplicación usa internamente
-EXPOSE 3000
+# 1. Compila la aplicación principal (src -> dist)
+RUN npm run build
 
-# El comando de inicio no cambia
+# 2. Compila el seed por separado. Usamos las opciones de tsconfig en la línea de comandos
+# para asegurar que se compile correctamente sin interferir con el build principal.
+RUN npx tsc prisma/seed.ts --outDir dist/prisma --esModuleInterop --resolveJsonModule --module commonjs --target es2020
+
+# --- Etapa 2: Producción ---
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --only=production
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/dist ./dist
+RUN npx prisma generate
+
+EXPOSE 3000
+# El CMD ahora apunta a la ubicación correcta
 CMD ["node", "dist/index.js"]

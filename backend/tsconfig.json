@@ -7,7 +7,7 @@
     "lib": ["es2020", "dom"],              // ¡SOLUCIÓN 2! Incluimos la librería de JS de ES2020 (que tiene .finally())
 
     // --- Rutas y Salida ---
-    "rootDir": "./",                      // La raíz de nuestro código fuente de la aplicación (incluye 'prisma' y 'src')
+    "rootDir": "./src",                      // La raíz de nuestro código fuente de la aplicación (incluye 'prisma' y 'src')
     "outDir": "./dist",                   // Dónde se compilará el JavaScript
 
     // --- Interoperabilidad y Tipado Estricto ---
@@ -22,9 +22,6 @@
   },
 
   // --- Ámbito de Compilación para `npm run build` ---
-  "include": [
-    "src/**/*",
-    "prisma/seed.ts"
-  ],                // Para el build, solo nos importa compilar la carpeta 'src'
+  "include": ["src/**/*"],                // Para el build, solo nos importa compilar la carpeta 'src'
   "exclude": ["node_modules"]             // Siempre excluimos node_modules
 }
