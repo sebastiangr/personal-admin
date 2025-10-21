@@ -1,5 +1,5 @@
 # --- Etapa 1: Build ---
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
@@ -9,7 +9,7 @@ RUN npm run build
 # El seed ya no se compila aquí, no es necesario para producción por ahora
 
 # --- Etapa 2: Producción ---
-FROM node:20-alpine
+FROM node:20
 WORKDIR /app
 
 # Copia los archivos de manifiesto
