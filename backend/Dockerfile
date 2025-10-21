@@ -4,24 +4,33 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npx prisma generate
-
-# 1. Compila la aplicación principal (src -> dist)
+# No generamos el cliente aquí, lo haremos en la etapa final
 RUN npm run build
-
-# 2. Compila el seed por separado. Usamos las opciones de tsconfig en la línea de comandos
-# para asegurar que se compile correctamente sin interferir con el build principal.
-RUN npx tsc prisma/seed.ts --outDir dist/prisma --esModuleInterop --resolveJsonModule --module commonjs --target es2020
+# El seed ya no se compila aquí, no es necesario para producción por ahora
 
 # --- Etapa 2: Producción ---
 FROM node:20-alpine
 WORKDIR /app
+
+# Copia los archivos de manifiesto
 COPY package*.json ./
+
+# ¡CLAVE! En lugar de copiar node_modules, ejecutamos una instalación limpia
+# de las dependencias de producción. Esto obliga a NPM a descargar los
+# binarios correctos para la arquitectura de la imagen final (ARM).
 RUN npm install --only=production
-COPY --from=builder /app/prisma ./prisma
+
+# Copia el schema de Prisma
+COPY prisma ./prisma/
+
+# Copia el código JavaScript compilado desde la etapa 'builder'
 COPY --from=builder /app/dist ./dist
+
+# ¡CLAVE! Generamos el cliente de Prisma AHORA, en la etapa final.
+# Esto asegura que se vincule con el motor binario correcto para ARM.
 RUN npx prisma generate
 
 EXPOSE 3000
-# El CMD ahora apunta a la ubicación correcta
+
+# El CMD no cambia, pero ahora apunta al código que funcionará
 CMD ["node", "dist/index.js"]
