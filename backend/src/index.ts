@@ -1,19 +1,3 @@
-import express from 'express';
-
-const app = express();
-const PORT = 3000; // Puerto INTERNO del contenedor
-const HOST = '0.0.0.0';
-
-app.get('/api/health', (req, res) => {
-    console.log('¡HEALTH CHECK RECIBIDO!');
-    res.status(200).json({ status: 'ok' });
-});
-
-app.listen(PORT, HOST, () => {
-    console.log(`Servidor MÍNIMO corriendo en http://${HOST}:${PORT}`);
-});
-
-
 // import 'dotenv/config';
 // import bodyParser from 'body-parser';
 // import express, { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
@@ -93,3 +77,20 @@ app.listen(PORT, HOST, () => {
 //   console.error("Error inesperado durante el arranque de la aplicación:", error);
 //   process.exit(1);
 // });
+
+
+// FOR TESTING
+import express from 'express';
+
+const app = express();
+const PORT = 3000; // Puerto INTERNO del contenedor
+const HOST = '0.0.0.0';
+
+app.get('/api/health', (req, res) => {
+    console.log('¡HEALTH CHECK RECIBIDO!');
+    res.status(200).json({ status: 'ok' });
+});
+
+app.listen(PORT, HOST, () => {
+    console.log(`Servidor MÍNIMO corriendo en http://${HOST}:${PORT}`);
+});
