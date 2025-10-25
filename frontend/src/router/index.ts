@@ -28,6 +28,18 @@ const router = createRouter({
           component: () => import('@/views/app/CompaniesView.vue'), // ¡Apunta al nuevo archivo!
           meta: { requiresAuth: true }
         },
+        {          
+          path: 'companies/:id',
+          name: 'company-detail',
+          component: () => import('@/views/app/ContactDetailView.vue'),
+          meta: { requiresAuth: true }
+        },        
+        {
+          path: 'people',
+          name: 'people',
+          component: () => import('@/views/app/PeopleView.vue'),
+          meta: { requiresAuth: true }
+        }
         // {
         //   path: 'history',
         //   name: 'history',

@@ -75,6 +75,9 @@ watchEffect(() => {
           <li>
             <RouterLink to="/app/people">Personas</RouterLink>
           </li>
+          <li>
+            <RouterLink to="/app/history">Historial</RouterLink>
+          </li>
         </ul>
       </div>
 

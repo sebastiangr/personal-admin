@@ -215,7 +215,14 @@
           </thead>
           <tbody>
             <tr v-for="company in sortedCompanies" :key="company.id" class="hover">
-              <td>{{ company.name }}</td>
+              <td>
+                <RouterLink 
+                  :to="{ name: 'company-detail', params: { id: company.id } }"
+                  class="link link-hover link-primary font-semibold"
+                >
+                  {{ company.name }}
+                </RouterLink>
+              </td>
               <td class="hidden lg:table-cell">
                 {{ getCompanyTypeLabel(company.type) }}
               </td>
