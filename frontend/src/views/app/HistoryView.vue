@@ -83,10 +83,10 @@
           <li 
             v-for="log in logs" 
             :key="log.id" 
-            class="grid grid-cols-[150px_minmax(150px,_1fr)_2fr] items-center gap-4 py-3 border-b border-base-200 last:border-b-0"
+            class="grid grid-cols-[180px_minmax(180px,_1fr)_2fr] items-center gap-4 py-3 border-b border-base-200 last:border-b-0"
           >
             <!-- Columna de Fecha -->
-            <div class="text-sm text-base-content/60 font-mono">
+            <div class="text-xs text-base-content/60 font-mono">
               {{ formatDate(log.createdAt) }}
             </div>
 
