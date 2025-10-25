@@ -6,7 +6,8 @@ import {
   updateCompany,
   deleteCompany,
   assignPersonToCompany,
-  getPeopleInCompany
+  getPeopleInCompany,
+  unassignPersonFromCompany
 } from '../controllers/company.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 import { createCompanySchema, updateCompanySchema, assignPersonSchema, idParamSchema } from '../lib/schemas';
@@ -27,5 +28,7 @@ router.route('/:companyId')
 router.route('/:companyId/people')
   .get(getPeopleInCompany)
   .post(validate(assignPersonSchema),assignPersonToCompany);
+
+router.delete('/:companyId/people/:personId', unassignPersonFromCompany);  
 
 export default router;

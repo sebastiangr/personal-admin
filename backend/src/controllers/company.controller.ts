@@ -117,11 +117,59 @@ export const assignPersonToCompany = async (req: Request, res: Response) => {
     const assignment = await prisma.personOnCompany.create({
       data: { companyId, personId, role }
     });
+    await prisma.activityLog.create({
+      data: {
+        eventDescription: `Se asignó a '${person.name}' a la compañía con el rol '${assignment.role || 'sin rol'}'.`,
+        companyId: companyId,
+      }
+    });
+
     res.status(201).json(assignment);      
   } catch (error: any) {    
     if (error.code === 'P2002') {
       return res.status(409).json({ error: 'This person is already assigned to this company.' });
     }    
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const unassignPersonFromCompany = async (req: Request, res: Response) => {
+  const { companyId, personId } = req.params;
+  const userId = getUserId(req);
+
+  try {    
+    const company = await prisma.company.findFirst({ where: { id: companyId, userId } });
+    const personToUnassign = await prisma.person.findUnique({ where: { id: personId } });
+
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found or you do not have permission.' });
+    }
+    
+    await prisma.personOnCompany.delete({
+      where: {
+        personId_companyId: {
+          personId: personId,
+          companyId: companyId,
+        }
+      }
+    });
+
+    if (personToUnassign) {
+      await prisma.activityLog.create({
+        data: {
+          eventDescription: `Se desasignó a '${personToUnassign.name}' de la compañía.`,
+          companyId: companyId,
+        }
+      });
+    }    
+
+    res.status(204).send();
+
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Assignment not found.' });
+    }
+    console.error('Unassignment error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

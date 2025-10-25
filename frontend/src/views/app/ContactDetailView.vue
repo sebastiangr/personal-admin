@@ -4,7 +4,7 @@
   import apiClient from '@/utils/api';
   import Modal from '@/components/ui/Modal.vue';
   import PersonForm from '@/components/PersonForm.vue';
-  import { ChevronLeft } from 'lucide-vue-next';
+  import { ChevronLeft, Trash2 } from 'lucide-vue-next';
 
   const route = useRoute();
   const router = useRouter();
@@ -63,6 +63,18 @@
       alert(`Error: ${e.message}`);
     }
   }
+
+  async function handleUnassignPerson(personId: string) {
+    if (!confirm('¿Estás seguro de que quieres desasignar a esta persona de la compañía?')) {
+      return;
+    }
+    try {
+      await apiClient.delete(`/companies/${companyId}/people/${personId}`);      
+      peopleInCompany.value = peopleInCompany.value.filter(p => p.id !== personId);
+    } catch (e: any) {
+      alert(`Error: ${e.message}`);
+    }
+  }  
 </script>
 
 <template>
@@ -79,7 +91,7 @@
 
       <h1 class="text-4xl font-bold">{{ company.name }}</h1>
       <p>{{ company.type }} - {{ company.city }}, {{ company.country }}</p>
-      <!-- ... (muestra aquí más detalles de la compañía) ... -->
+      <!-- TODO: Mostrar más campos y mejorar visualización de detalle compañía -->
     </div>
 
     <!-- SECCIÓN DE PERSONAS ASIGNADAS -->
@@ -93,8 +105,14 @@
         <p>No hay personas asignadas a esta compañía.</p>
       </div>
       <ul v-else class="space-y-2">
-        <li v-for="person in peopleInCompany" :key="person.id" class="p-2 bg-base-100 rounded-lg">
-          {{ person.name }} <span v-if="person.role" class="text-base-content/60">- {{ person.role }}</span>
+        <li v-for="person in peopleInCompany" :key="person.id" class="flex justify-between items-center p-2 bg-base-100 rounded-lg">
+          <span>
+            {{ person.name }} <span v-if="person.role" class="text-base-content/60">- {{ person.role }}</span>
+          </span>
+          <!-- TODO: Añadir modal para confirmar eliminación -->
+          <button class="btn btn-xs btn-ghost text-error" @click="handleUnassignPerson(person.id)">
+            <Trash2 :size="20" />
+          </button>
         </li>
       </ul>
     </div>
