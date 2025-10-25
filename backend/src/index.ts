@@ -8,6 +8,7 @@ import prisma from './lib/db';
 import authRoutes from './routes/auth.routes';
 import companyRoutes from './routes/company.routes';
 import personRoutes from './routes/person.routes';
+import activityLogRoutes from './routes/activity-log.routes';
 
 // --- INITIALIZATION ---
 const app = express();
@@ -43,6 +44,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/people', personRoutes);
+app.use('/api/activity-logs', activityLogRoutes);
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error(err.stack);
