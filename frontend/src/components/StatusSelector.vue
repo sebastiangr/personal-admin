@@ -27,7 +27,7 @@
 
     isLoading.value = true
     try {
-      const updatedContact = await apiClient.put(`/api/contacts/${props.contactId}`, {
+      const updatedContact = await apiClient.put(`/companies/${props.contactId}`, {
         status: newStatus,
       })
       // Emite el evento con el contacto actualizado para que el padre actualice su lista

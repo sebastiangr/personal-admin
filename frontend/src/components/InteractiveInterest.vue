@@ -22,7 +22,7 @@ async function setInterestLevel(level: 1 | 2 | 3) {
 
   isLoading.value = true
   try {
-    const updatedContact = await apiClient.put(`/api/contacts/${props.contactId}`, {
+    const updatedContact = await apiClient.put(`/companies/${props.contactId}`, {
       interestLevel: level
     })
     emit('level-updated', updatedContact)

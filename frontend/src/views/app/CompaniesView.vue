@@ -65,9 +65,12 @@
 
   onMounted(fetchCompanies);
 
+
   function handleCompanyUpdate(updatedCompany: any) {
     const index = companies.value.findIndex(c => c.id === updatedCompany.id);
-    if (index !== -1) companies.value[index] = updatedCompany;
+    if (index !== -1) {
+      companies.value.splice(index, 1, updatedCompany);
+    }
   }
 
   function openCreateModal() {
@@ -81,6 +84,7 @@
   }
 
   async function handleFormSubmit(formData: Record<string, any>) {
+    error.value = null;
     try {
       if (companyToEdit.value) {
         const updatedCompany = await apiClient.put(`/companies/${companyToEdit.value.id}`, formData);
@@ -90,8 +94,14 @@
         companies.value.unshift(newCompany);
       }
       isFormModalOpen.value = false;
-    } catch (e: any) {
-      alert("Error: " + e.message);
+    } catch (e: any) {      
+      if (e.status === 400 && e.data?.details) {
+        // Formatea los errores para que sean legibles
+        const validationErrors = e.data.details.map((d: any) => d.message).join('. ');
+        error.value = `Error de validación: ${validationErrors}`;
+      } else {
+        error.value = e.message || "Ocurrió un error al guardar.";
+      }      
     }
   }
 
@@ -107,8 +117,8 @@
       await apiClient.delete(`/companies/${companyToDeleteId.value}`);
       companies.value = companies.value.filter(c => c.id !== companyToDeleteId.value);
       isConfirmModalOpen.value = false;
-    } catch (e: any) {
-      alert("Error: " + e.message);
+    } catch (e: any) {      
+      error.value = e.message || "Ocurrió un error al eliminar.";
     } finally {
       isDeleting.value = false;
       companyToDeleteId.value = null;
@@ -123,43 +133,6 @@
       sortOrder.value = 'asc'
     }
   }
-
-  // const sortedContacts = computed(() => {
-  //   const sorted = [...contacts.value]
-
-  //   if (sortKey.value) {
-  //     sorted.sort((a, b) => {
-  //       // Para un ordenamiento más robusto, maneja nulos y mayúsculas/minúsculas
-  //       const valA = a[sortKey.value] ?? '' // Usa '' si el valor es null/undefined
-  //       const valB = b[sortKey.value] ?? ''
-        
-  //       if (typeof valA === 'string' && typeof valB === 'string') {
-  //         return sortOrder.value === 'asc' 
-  //           ? valA.localeCompare(valB) 
-  //           : valB.localeCompare(valA)
-  //       }
-        
-  //       if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1
-  //       if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1
-  //       return 0
-  //     })      
-  //   }
-
-
-  //   // if (sortKey.value) {
-  //   //   sorted.sort((a, b) => {
-  //   //     const valA = a[sortKey.value]
-  //   //     const valB = b[sortKey.value]
-        
-  //   //     if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1
-  //   //     if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1
-  //   //     return 0
-  //   //   })      
-  //   // }
-
-  //   return sorted
-  // })
-
 
 </script>
 
@@ -215,7 +188,7 @@
                   <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="country" />
                 </button>
               </th>
-              <th class="p-0 w-[80px]">
+              <th class="p-0 w-20">
                 <button @click="setSort('interestLevel')" class="flex items-center justify-center w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
                   <span>Interés</span>
                   <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="interestLevel" />

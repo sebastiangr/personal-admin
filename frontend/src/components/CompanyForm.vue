@@ -1,203 +1,159 @@
 <!-- src/components/CompanyForm.vue -->
 <script setup lang="ts">
-  import { ref, watch } from 'vue';
-  import { CompanyType, Status } from '@/types';    
+import { CompanyType, Status } from '@/types';
+import { useForm } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
+import { createCompanySchema } from '@/lib/schemas';
+import { watch } from 'vue';
+import { companyTypeOptions } from '@/utils/companyTypeHelper';
+import { statusOptions } from '@/utils/statusHelper';
 
-  const props = defineProps<{ initialData?: Record<string, any> | null }>()
-  const emit = defineEmits(['submit', 'cancel'])
-  
-  const formData = ref({
-    name: '',
-    type: CompanyType.AGENCY_STUDIO,
-    country: '',
-    city: '',
-    email: '',
-    website: '',
-    careerWebsite: '',
-    linkedinUrl: '',
-    instagramUrl: '',
-    behanceUrl: '',
-    notes: '',
-    interestLevel: 1,
-    status: Status.TO_CONTACT,
-  });
+const props = defineProps<{ initialData?: Record<string, any> | null }>();
+const emit = defineEmits(['submit', 'cancel']);
 
-  // Watcher para poblar el formulario en modo de edición
-  watch(() => props.initialData, (newData) => {
-    if (newData) {
-      formData.value = { ...formData.value, ...newData };
-    } else {
-      // Resetea a los valores por defecto para el modo de creación
-      formData.value = {
-        name: '', type: CompanyType.AGENCY_STUDIO, country: '', city: '',
-        email: '', website: '', careerWebsite: '', linkedinUrl: '', 
-        instagramUrl: '', behanceUrl: '', notes: '', interestLevel: 1, 
-        status: Status.TO_CONTACT,
-      };
-    }
-  }, { immediate: true });
+// Opciones para los selects
+const interestOptions = [
+  { label: 'Bajo', value: 1 },
+  { label: 'Medio', value: 2 },
+  { label: 'Alto', value: 3 },
+];
 
-  function handleSubmit() {
-    emit('submit', formData.value);
+const { defineField, handleSubmit, isSubmitting, errors, setValues, resetForm } = useForm({
+  validationSchema: toTypedSchema(createCompanySchema),
+});
+
+// Usamos defineField para cada campo. v-model es más limpio aquí.
+const [name, nameProps] = defineField('name');
+const [type, typeProps] = defineField('type');
+const [country, countryProps] = defineField('country');
+const [city, cityProps] = defineField('city');
+const [email, emailProps] = defineField('email');
+const [website, websiteProps] = defineField('website');
+const [careerWebsite, careerWebsiteProps] = defineField('careerWebsite');
+const [linkedinUrl, linkedinUrlProps] = defineField('linkedinUrl');
+const [instagramUrl, instagramUrlProps] = defineField('instagramUrl');
+const [behanceUrl, behanceUrlProps] = defineField('behanceUrl');
+const [notes, notesProps] = defineField('notes');
+const [interestLevel, interestLevelProps] = defineField('interestLevel');
+const [status, statusProps] = defineField('status');
+
+// 'handleSubmit' envuelve nuestra lógica. Solo se ejecuta si la validación pasa.
+const onSubmit = handleSubmit((values) => {
+  emit('submit', values);
+});
+
+// Watcher para llenar el formulario en modo edición o resetearlo
+watch(() => props.initialData, (newData) => {
+  if (newData) {
+    // Llena el formulario con los datos existentes
+    setValues(newData);
+  } else {
+    // Resetea el formulario a sus valores iniciales por defecto
+    resetForm({
+      values: {
+        name: '',
+        type: CompanyType.AGENCY_STUDIO,
+        country: '', city: '', email: '', website: '', careerWebsite: '',
+        linkedinUrl: '', instagramUrl: '', behanceUrl: '',
+        notes: '',
+        interestLevel: 2, // 'Medio' por defecto
+        status: Status.TO_CONTACT, // 'Por Contactar' por defecto
+      }
+    });
   }
+}, { immediate: true });
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <form @submit="onSubmit">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+      
+      <!-- Campos Principales -->
       <div class="form-control col-span-2">
         <label class="label"><span class="label-text">Nombre de la Empresa*</span></label>
-        <input v-model="formData.name" type="text" class="input input-bordered" required />
+        <input v-model="name" v-bind="nameProps" type="text" class="input input-bordered" />
+        <span v-if="errors.name" class="text-error text-xs mt-1">{{ errors.name }}</span>
       </div>
 
       <div class="form-control">
         <label class="label"><span class="label-text">Tipo de Empresa</span></label>
-        <select v-model="formData.type" class="select select-bordered">
-          <option v-for="type in Object.values(CompanyType)" :key="type" :value="type">{{ type }}</option>
+        <select v-model="type" v-bind="typeProps" class="select select-bordered">
+          <!-- AHORA ITERAMOS SOBRE LAS OPCIONES -->
+          <option v-for="opt in companyTypeOptions" :key="opt.value" :value="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="form-control">
+        <label class="label"><span class="label-text">Email de Contacto</span></label>
+        <input v-model="email" v-bind="emailProps" type="email" class="input input-bordered" />
+        <span v-if="errors.email" class="text-error text-xs mt-1">{{ errors.email }}</span>
+      </div>
+
+      <!-- Ubicación -->
+      <div class="form-control">
+        <label class="label"><span class="label-text">País</span></label>
+        <input v-model="country" v-bind="countryProps" type="text" class="input input-bordered" />
+      </div>
+      <div class="form-control">
+        <label class="label"><span class="label-text">Ciudad</span></label>
+        <input v-model="city" v-bind="cityProps" type="text" class="input input-bordered" />
+      </div>
+      
+      <!-- URLs -->
+      <div class="form-control col-span-2">
+        <label class="label"><span class="label-text">Sitio Web</span></label>
+        <input v-model="website" v-bind="websiteProps" type="text" placeholder="ej: google.com" class="input input-bordered" />
+        <span v-if="errors.website" class="text-error text-xs mt-1">{{ errors.website }}</span>
+      </div>
+      <div class="form-control col-span-2">
+        <label class="label"><span class="label-text">LinkedIn</span></label>
+        <input v-model="linkedinUrl" v-bind="linkedinUrlProps" type="text" class="input input-bordered" />
+        <span v-if="errors.linkedinUrl" class="text-error text-xs mt-1">{{ errors.linkedinUrl }}</span>
+      </div>
+      <div class="form-control col-span-2">
+        <label class="label"><span class="label-text">Instagram</span></label>
+        <input v-model="instagramUrl" v-bind="instagramUrlProps" type="text" class="input input-bordered" />
+        <span v-if="errors.instagramUrl" class="text-error text-xs mt-1">{{ errors.instagramUrl }}</span>
+      </div>
+      <div class="form-control col-span-2">
+        <label class="label"><span class="label-text">Behance</span></label>
+        <input v-model="behanceUrl" v-bind="behanceUrlProps" type="text" class="input input-bordered" />
+        <span v-if="errors.behanceUrl" class="text-error text-xs mt-1">{{ errors.behanceUrl }}</span>
+      </div>
+      
+      <!-- Notas -->
+      <div class="form-control col-span-2">
+        <label class="label"><span class="label-text">Notas</span></label>
+        <textarea v-model="notes" v-bind="notesProps" class="textarea textarea-bordered" rows="3"></textarea>
+      </div>
+
+      <!-- Interés y Estado -->
+      <div class="form-control">
+        <label class="label"><span class="label-text">Nivel de Interés</span></label>
+        <select v-model="interestLevel" v-bind="interestLevelProps" class="select select-bordered">
+          <option v-for="opt in interestOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+      <div class="form-control">
+        <label class="label"><span class="label-text">Estado Inicial</span></label>
+        <select v-model="status" v-bind="statusProps" class="select select-bordered">
+          <!-- AHORA ITERAMOS SOBRE LAS OPCIONES -->
+          <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
+            {{ opt.label }}
+          </option>
         </select>
       </div>
 
-      <div class="form-control">
-        <label class="label"><span class="label-text">Email de Contacto</span></label>
-        <input v-model="formData.email" type="email" class="input input-bordered" />
-      </div>
-
-      <div class="form-control">
-        <label class="label"><span class="label-text">País</span></label>
-        <input v-model="formData.country" type="text" class="input input-bordered" />
-      </div>
-
-      <div class="form-control">
-        <label class="label"><span class="label-text">Ciudad</span></label>
-        <input v-model="formData.city" type="text" class="input input-bordered" />
-      </div>
-
-      <div class="form-control col-span-2">
-        <label class="label"><span class="label-text">Sitio Web Principal</span></label>
-        <input v-model="formData.website" type="url" class="input input-bordered" />
-      </div>
-      
-      <div class="form-control col-span-2">
-        <label class="label"><span class="label-text">Sitio Web de Empleo</span></label>
-        <input v-model="formData.careerWebsite" type="url" class="input input-bordered" />
-      </div>
-      
-      <div class="form-control col-span-2">
-        <label class="label"><span class="label-text">URL de LinkedIn</span></label>
-        <input v-model="formData.linkedinUrl" type="url" class="input input-bordered" />
-      </div>
-
-      <div class="form-control col-span-2">
-        <label class="label"><span class="label-text">Notas</span></label>
-        <textarea v-model="formData.notes" class="textarea textarea-bordered" rows="4"></textarea>
-      </div>
     </div>
     
-    <div class="mt-6 flex justify-end gap-4">
+    <div class="mt-8 flex justify-end gap-4">
       <button type="button" class="btn btn-ghost" @click="$emit('cancel')">Cancelar</button>
-      <button type="submit" class="btn btn-primary">Guardar</button>
+      <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+        <span v-if="isSubmitting" class="loading loading-spinner"></span>
+        Guardar
+      </button>
     </div>
   </form>
 </template>
-
-
-<!-- <script setup lang="ts">
-  import { ref, watch } from 'vue';
-
-  // --- PROPS ---
-  const props = defineProps<{
-    initialData?: Record<string, any> | null
-  }>()
-
-  // --- EMITS ---
-  // defineEmits declara los eventos personalizados que este componente puede "emitir"
-  // hacia su componente padre.
-  const emit = defineEmits<{
-    (e: 'submit', formData: Record<string, any>): void
-    (e: 'cancel'): void
-  }>()
-
-  // --- ESTADO DEL FORMULARIO ---
-  // Usamos ref() para cada campo del formulario.
-  const formData = ref({
-    companyName: '',
-    contactName: '',
-    email: '',
-    website: '',
-    sector: '',
-    notes: '',
-    interestLevel: 1, // Valor por defecto
-    status: 'BACKLOG', // Valor por defecto
-  });
-
-  // --- WATCHER ---
-  // watch() observa cambios en una fuente (props.initialData).
-  // Se ejecutará cada vez que el padre cambie el contacto a editar.
-  watch(() => props.initialData, (newData) => {
-    if (newData) {
-      // Si hay datos iniciales, los copiamos a nuestro formulario.
-      formData.value = {
-        companyName: newData.companyName ?? '',
-        contactName: newData.contactName ?? '',
-        email: newData.email ?? '',
-        website: newData.website ?? '',
-        sector: newData.sector ?? '',
-        notes: newData.notes ?? '',
-        interestLevel: newData.interestLevel ?? 1,
-        status: newData.status ?? 'BACKLOG',
-      };
-    } else {
-      // Si no, reseteamos el formulario (para el modo "Crear").
-      formData.value = {
-        companyName: '',
-        contactName: '',
-        email: '',
-        website: '',
-        sector: '',
-        notes: '',
-        interestLevel: 1,
-        status: 'BACKLOG',
-      };
-    }
-  }, { immediate: true }); // immediate: true hace que se ejecute una vez al crearse.
-
-
-  // --- MÉTODOS ---
-  function handleSubmit() {
-    // El padre ya sabrá si es una edición o creación.
-    // El formulario solo emite los datos.
-    emit('submit', formData.value);
-  }
-</script> -->
-
-<!-- <template>
-  <form @submit.prevent="handleSubmit">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="flex flex-col col-span-2 w-full">
-        <label class="mb-1 font-semibold text-sm">Nombre de la Empresa*</label>
-        <input v-model="formData.companyName" type="text" class="input input-bordered w-full" required />
-      </div>
-      <div class="flex flex-col w-full">
-        <label class="mb-1 font-semibold text-sm">Nombre del Contacto</label>
-        <input v-model="formData.contactName" type="text" class="input input-bordered w-full" />
-      </div>
-      <div class="flex flex-col w-full">
-        <label class="mb-1 font-semibold text-sm">Email</label>
-        <input v-model="formData.email" type="email" class="input input-bordered w-full" />
-      </div>
-      <div class="flex flex-col col-span-2 w-full">
-        <label class="mb-1 font-semibold text-sm">Sitio Web</label>
-        <input v-model="formData.website" type="url" class="input input-bordered w-full" />
-      </div>
-      <div class="flex flex-col col-span-2 w-full">
-        <label class="mb-1 font-semibold text-sm">Notas</label>
-        <textarea v-model="formData.notes" class="textarea textarea-bordered w-full" rows="3"></textarea>
-      </div>
-    </div>
-
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-      <button type="button" class="btn btn-secondary w-full" @click="$emit('cancel')">Cancelar</button>
-      <button type="submit" class="btn btn-primary w-full">Guardar Contacto</button>
-    </div>
-  </form>
-</template> -->

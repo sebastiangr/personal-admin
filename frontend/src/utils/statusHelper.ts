@@ -1,25 +1,23 @@
+export type ContactStatus = 'BACKLOG' | 'TO_CONTACT' | 'WAITING' | 'IN_PROGRESS' | 'ARCHIVED' | 'HIRED';
 
-// El tipo para nuestros estados de la DB, para tener autocompletado y seguridad de tipos.
-export type ContactStatus = 'BACKLOG' | 'TO_CONTACT' | 'CONTACTED' | 'WAITING_RESPONSE' | 'IN_CONVERSATION' | 'REJECTED' | 'HIRED';
-
-// El diccionario que mapea el estado de la DB a la UI
 export const statusMap: Record<ContactStatus, { text: string; colorClass: string }> = {
-  BACKLOG:          { text: 'Pendiente',      colorClass: 'badge-neutral' },
-  TO_CONTACT:       { text: 'Por Contactar',  colorClass: 'badge-ghost' },
-  CONTACTED:        { text: 'Contactado',     colorClass: 'badge-info' }, // "Contactado" es más conciso
-  WAITING_RESPONSE: { text: 'En Espera',      colorClass: 'badge-warning' },
-  IN_CONVERSATION:  { text: 'En Conversación',colorClass: 'badge-primary' },
-  REJECTED:         { text: 'Archivado',      colorClass: 'badge-error' }, // "Archivado" es menos negativo y profesional
-  HIRED:            { text: '¡Contratado!',   colorClass: 'badge-success' },
+  BACKLOG:     { text: 'En Radar',      colorClass: 'badge-neutral' },
+  TO_CONTACT:  { text: 'Por Contactar', colorClass: 'badge-info' },
+  WAITING:     { text: 'En Espera',     colorClass: 'badge-warning' },
+  IN_PROGRESS: { text: 'En Proceso',    colorClass: 'badge-primary' },
+  ARCHIVED:    { text: 'Archivado',     colorClass: 'badge-error' },
+  HIRED:       { text: '¡Contratado!',   colorClass: 'badge-success' },
 };
 
-// Una lista de los estados que el usuario puede seleccionar.
-// Podemos excluir algunos si no queremos que se seleccionen manualmente.
 export const selectableStatuses: ContactStatus[] = [
   'BACKLOG',
   'TO_CONTACT',
-  'CONTACTED',
-  'WAITING_RESPONSE',
-  'IN_CONVERSATION',
-  'REJECTED',
+  'WAITING',
+  'IN_PROGRESS',
+  'ARCHIVED',
 ];
+
+export const statusOptions = (Object.keys(statusMap) as ContactStatus[]).map((value: ContactStatus) => ({
+  value,
+  label: statusMap[value].text,
+}));
