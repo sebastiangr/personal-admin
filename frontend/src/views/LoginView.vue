@@ -40,6 +40,8 @@
   onMounted(() => {
     if (route.query.registered === 'true') {
       successMessage.value = '¡Registro exitoso! Por favor, inicia sesión.';
+    } else if (route.query.sessionExpired === 'true') {
+      serverError.value = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
     }
   });
 

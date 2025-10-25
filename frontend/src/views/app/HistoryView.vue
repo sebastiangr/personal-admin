@@ -1,96 +1,115 @@
+<script setup lang="ts">
+  import { ref, onMounted } from 'vue';
+  import { RouterLink } from 'vue-router';
+  import apiClient from '@/utils/api';
+  import { statusMap } from '@/utils/statusHelper';
+  import type { ContactStatus } from '@/utils/statusHelper';
+
+  // --- ESTADO ---
+  const logs = ref<any[]>([]);
+  const isLoading = ref(true);
+  const error = ref<string | null>(null);
+
+  // --- MÉTODOS ---
+
+  /**
+   * Formatea una fecha ISO a un formato legible (DD/MM/AA hh:mm am/pm)
+   * en la zona horaria local del navegador.
+   */
+  function formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('es-ES', {
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    }).format(date);
+}
+
+  /**
+   * Traduce los valores de estado del backend (ej: 'BACKLOG') a texto legible
+   * usando nuestro statusMap.
+   */
+  function translateLog(logText: string): string {
+    // Crea una expresión regular para encontrar cualquiera de las claves de nuestro mapa
+    const statusKeys = Object.keys(statusMap).join('|');
+    const regex = new RegExp(statusKeys, 'g');
+
+    // Reemplaza cada coincidencia con su texto legible
+    return logText.replace(regex, (match) => {
+      return statusMap[match as ContactStatus]?.text || match;
+    });
+  }
+
+  // Carga los datos del historial cuando el componente se monta
+  onMounted(async () => {
+    try {
+      logs.value = await apiClient.get('/activity-logs');
+    } catch (e: any) {
+      error.value = e.message || 'Error al cargar el historial.';
+    } finally {
+      isLoading.value = false;
+    }
+  });
+</script>
+
 <template>
+  <div>
+    <h1 class="text-3xl font-bold mb-6">Historial de Actividad</h1>
 
-  <!-- TODO: View of all logs organized from newest to oldest, add pagination. -->
-  TODO: Add links to the 
-  <div class="p-8">
-    <h1 class="text-3xl font-bold">History View</h1>
-    <p class="mt-4 text-lg">Sección History.</p>
-    <div class="mt-8">
-        <button class="btn btn-error" @click="useAuthStore().logout()">Cerrar Sesión</button>
+    <!-- ESTADO DE CARGA -->
+    <div v-if="isLoading" class="text-center p-10">
+      <span class="loading loading-lg loading-spinner text-primary"></span>
     </div>
-
-
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-      <legend class="fieldset-legend">Page details</legend>
-
-      <label class="label">Title</label>
-      <input type="text" class="input" placeholder="My awesome page" />
-
-      <label class="label">Slug</label>
-      <input type="text" class="input" placeholder="my-awesome-page" />
-
-      <label class="label">Author</label>
-      <input type="text" class="input" placeholder="Name" />
-    </fieldset>
-
-    <div role="alert" class="alert alert-success mt-10 mb-10">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>Your purchase has been confirmed!</span>
+    
+    <!-- ESTADO DE ERROR -->
+    <div v-else-if="error" class="alert alert-error">
+      <span>{{ error }}</span>
     </div>
-
-    <div class="stats shadow">
-      <div class="stat">
-        <div class="stat-figure text-primary">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="inline-block h-8 w-8 stroke-current"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            ></path>
-          </svg>
-        </div>
-        <div class="stat-title">Total Likes</div>
-        <div class="stat-value text-primary">25.6K</div>
-        <div class="stat-desc">21% more than last month</div>
+    
+    <!-- CONTENIDO PRINCIPAL -->
+    <div v-else class="bg-base-100 rounded-lg shadow">
+      <!-- ESTADO VACÍO -->
+      <div v-if="logs.length === 0" class="text-center p-10">
+        <p class="text-lg">No hay actividad registrada todavía.</p>
       </div>
-
-      <div class="stat">
-        <div class="stat-figure text-secondary">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="inline-block h-8 w-8 stroke-current"
+      
+      <!-- LISTA DE LOGS -->
+      <div v-else class="p-4">
+        <ul>
+          <li 
+            v-for="log in logs" 
+            :key="log.id" 
+            class="grid grid-cols-[150px_minmax(150px,_1fr)_2fr] items-center gap-4 py-3 border-b border-base-200 last:border-b-0"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 10V3L4 14h7v7l9-11h-7z"
-            ></path>
-          </svg>
-        </div>
-        <div class="stat-title">Page Views</div>
-        <div class="stat-value text-secondary">2.6M</div>
-        <div class="stat-desc">21% more than last month</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-figure text-secondary">
-          <div class="avatar avatar-online">
-            <div class="w-16 rounded-full">
-              <img src="https://img.daisyui.com/images/profile/demo/anakeen@192.webp" />
+            <!-- Columna de Fecha -->
+            <div class="text-sm text-base-content/60 font-mono">
+              {{ formatDate(log.createdAt) }}
             </div>
-          </div>
-        </div>
-        <div class="stat-value">86%</div>
-        <div class="stat-title">Tasks done</div>
-        <div class="stat-desc text-secondary">31 tasks remaining</div>
+
+            <!-- Columna de Nombre de Compañía (con enlace) -->
+            <div class="font-semibold truncate">
+              <RouterLink 
+                v-if="log.company"
+                :to="{ name: 'company-detail', params: { id: log.company.id } }"
+                class="link link-hover link-primary"
+                :title="log.company.name"
+              >
+                {{ log.company.name }}
+              </RouterLink>
+              <span v-else class="italic text-base-content/50">Compañía eliminada</span>
+            </div>
+            
+            <!-- Columna de Descripción del Log -->
+            <div class="text-sm text-base-content/80">
+              {{ translateLog(log.eventDescription) }}
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
-
   </div>
 </template>
-
-<script setup lang="ts">
-  // Importamos el store solo para el botón de logout
-  import { useAuthStore } from '@/stores/auth' 
-</script>

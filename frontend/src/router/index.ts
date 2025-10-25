@@ -39,13 +39,13 @@ const router = createRouter({
           name: 'people',
           component: () => import('@/views/app/PeopleView.vue'),
           meta: { requiresAuth: true }
+        },
+        {
+          path: 'history',
+          name: 'history',
+          component: () => import('@/views/app/HistoryView.vue'),
+          meta: { requiresAuth: true }
         }
-        // {
-        //   path: 'history',
-        //   name: 'history',
-        //   component: HistoryView,
-        //   meta: { requiresAuth: true }
-        // },
         // ... otras rutas protegidas
       ]
     },

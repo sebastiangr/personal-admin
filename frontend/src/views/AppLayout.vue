@@ -92,7 +92,7 @@ watchEffect(() => {
           <input 
             type="checkbox" 
             @change="toggleTheme"
-            :checked="theme === dark"
+            :checked="theme === business"
           />
           
           <!-- Icono de Luna: se muestra cuando el tema es 'dark' (checkbox 'checked') -->
