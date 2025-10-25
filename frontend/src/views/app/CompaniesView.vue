@@ -159,9 +159,7 @@
       <div class="flex gap-4 items-center">
 
         <div class="flex items-center gap-2">
-          
-          <!-- --- INICIO: NUEVOS BOTONES DE ORDENAMIENTO (SOLO PARA VISTA GRID) --- -->
-          <!-- Este 'div' completo solo se muestra si viewMode es 'grid' -->
+                              
           <div v-if="viewMode === 'grid'" class="join">
             <button 
               class="btn btn-ghost join-item btn-sm"
@@ -231,111 +229,111 @@
       <!-- TABLA DE COMPAÑÍAS (CON DATOS) -->
       <!-- <div v-else class="overflow-x bg-base-100 rounded-lg shadow"> -->
       <div v-else>
-      <div v-if="viewMode === 'table'" class="overflow-x-auto bg-base-100 rounded-lg shadow">
-        <table class="table w-full">
-          <!-- ENCABEZADO DE LA TABLA -->
-          <thead class="bg-base-300 text-base-content text-sm uppercase">
-            <tr>
-              <th class="p-0">
-                <button @click="setSort('name')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
-                  <span>Compañía</span>
-                  <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="name" />
-                </button>
-              </th>
-              <th class="p-0 hidden lg:table-cell">
-                <button @click="setSort('type')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
-                  <span>Tipo</span>
-                  <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="type" />
-                </button>
-              </th>
-              <th class="p-0 hidden xl:table-cell">
-                <button @click="setSort('country')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
-                  <span>Ubicación</span>
-                  <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="country" />
-                </button>
-              </th>
-              <th class="p-0 w-20 hidden md:table-cell">
-                <button @click="setSort('interestLevel')" class="flex items-center justify-center w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
-                  <span>Interés</span>
-                  <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="interestLevel" />
-                </button>
-              </th>
-              <th class="p-0 hidden sm:table-cell">
-                <button @click="setSort('status')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
-                  <span>Estado</span>
-                  <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="status" />
-                </button>
-              </th>
-              <th class="text-center w-[150px] px-4 py-3">Acciones</th>            
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="company in sortedCompanies" :key="company.id" class="hover">
-              <td>
-                <RouterLink 
-                  :to="{ name: 'company-detail', params: { id: company.id } }"
-                  class="link link-hover link-primary font-semibold"
-                >
-                  {{ company.name }}
-                </RouterLink>
-              </td>
-              <td class="hidden lg:table-cell">
-                {{ getCompanyTypeLabel(company.type) }}
-              </td>
-              <td class="hidden xl:table-cell">
-                {{ company.city || '' }}, {{ company.country || '' }}
-              </td>
-              <td class="text-center hidden md:table-cell">
-                <InteractiveInterest
-                  :contact-id="company.id"
-                  :current-level="company.interestLevel"
-                  @level-updated="handleCompanyUpdate"
-                />
-              </td>
-              <td class="text-center hidden sm:table-cell">
-                <StatusSelector
-                  :contact-id="company.id"
-                  :current-status="company.status"
-                  @status-updated="handleCompanyUpdate"
-                />
-              </td>
-              <td class="text-center space-x-2">
-                <div v-if="company.notes && company.notes.trim() !== ''" class="tooltip tooltip-left" data-tip="Ver/Editar Notas">
-                  <button class="btn btn-sm btn-square btn-ghost" @click="openNotesModal(company)">
-                    <FileText :size="20" />
+        <div v-if="viewMode === 'table'" class="overflow-x bg-base-100 rounded-lg shadow">
+          <table class="table w-full">
+            <!-- ENCABEZADO DE LA TABLA -->
+            <thead class="bg-base-300 text-base-content text-sm uppercase">
+              <tr>
+                <th class="p-0">
+                  <button @click="setSort('name')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
+                    <span>Compañía</span>
+                    <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="name" />
                   </button>
-                </div>            
-                <div v-else class="tooltip tooltip-left" data-tip="Añadir Nota">
-                  <button class="btn btn-sm btn-square btn-ghost" @click="openNotesModal(company)">      
-                    <FilePlus :size="20" />
+                </th>
+                <th class="p-0 hidden lg:table-cell">
+                  <button @click="setSort('type')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
+                    <span>Tipo</span>
+                    <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="type" />
                   </button>
-                </div>    
+                </th>
+                <th class="p-0 hidden xl:table-cell">
+                  <button @click="setSort('country')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
+                    <span>Ubicación</span>
+                    <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="country" />
+                  </button>
+                </th>
+                <th class="p-0 w-20 hidden md:table-cell">
+                  <button @click="setSort('interestLevel')" class="flex items-center justify-center w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
+                    <span>Interés</span>
+                    <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="interestLevel" />
+                  </button>
+                </th>
+                <th class="p-0 hidden sm:table-cell">
+                  <button @click="setSort('status')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
+                    <span>Estado</span>
+                    <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="status" />
+                  </button>
+                </th>
+                <th class="text-center w-[150px] px-4 py-3">Acciones</th>            
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="company in sortedCompanies" :key="company.id" class="hover">
+                <td>
+                  <RouterLink 
+                    :to="{ name: 'company-detail', params: { id: company.id } }"
+                    class="link link-hover link-primary font-semibold"
+                  >
+                    {{ company.name }}
+                  </RouterLink>
+                </td>
+                <td class="hidden lg:table-cell">
+                  {{ getCompanyTypeLabel(company.type) }}
+                </td>
+                <td class="hidden xl:table-cell">
+                  {{ company.city || '' }}, {{ company.country || '' }}
+                </td>
+                <td class="text-center hidden md:table-cell">
+                  <InteractiveInterest
+                    :contact-id="company.id"
+                    :current-level="company.interestLevel"
+                    @level-updated="handleCompanyUpdate"
+                  />
+                </td>
+                <td class="text-center hidden sm:table-cell">
+                  <StatusSelector
+                    :contact-id="company.id"
+                    :current-status="company.status"
+                    @status-updated="handleCompanyUpdate"
+                  />
+                </td>
+                <td class="text-center space-x-2">
+                  <div v-if="company.notes && company.notes.trim() !== ''" class="tooltip tooltip-left" data-tip="Ver/Editar Notas">
+                    <button class="btn btn-sm btn-square btn-ghost" @click="openNotesModal(company)">
+                      <FileText :size="20" />
+                    </button>
+                  </div>            
+                  <div v-else class="tooltip tooltip-left" data-tip="Añadir Nota">
+                    <button class="btn btn-sm btn-square btn-ghost" @click="openNotesModal(company)">      
+                      <FilePlus :size="20" />
+                    </button>
+                  </div>    
 
-                <div class="tooltip tooltip-left" data-tip="Editar Compañía">
-                  <button class="btn btn-sm btn-square btn-ghost" @click="openEditModal(company)">
-                    <Pencil :size="20" />
-                  </button>
-                </div>
+                  <div class="tooltip tooltip-left" data-tip="Editar Compañía">
+                    <button class="btn btn-sm btn-square btn-ghost" @click="openEditModal(company)">
+                      <Pencil :size="20" />
+                    </button>
+                  </div>
 
-                <div class="tooltip tooltip-left" data-tip="Eliminar">
-                  <button class="btn btn-sm btn-square btn-ghost text-error" @click="promptForDelete(company.id)">
-                    <Trash2 :size="20" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                  <div class="tooltip tooltip-left" data-tip="Eliminar">
+                    <button class="btn btn-sm btn-square btn-ghost text-error" @click="promptForDelete(company.id)">
+                      <Trash2 :size="20" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <CompaniesGrid
-        v-else-if="viewMode === 'grid'"
-        :companies="sortedCompanies"
-        @update-company="handleCompanyUpdate"
-        @edit-company="openEditModal"
-        @delete-company="promptForDelete"
-        @view-company-notes="openNotesModal"
-      />   
+        <CompaniesGrid
+          v-else-if="viewMode === 'grid'"
+          :companies="sortedCompanies"
+          @update-company="handleCompanyUpdate"
+          @edit-company="openEditModal"
+          @delete-company="promptForDelete"
+          @view-company-notes="openNotesModal"
+        />   
       </div>   
       
     </div>

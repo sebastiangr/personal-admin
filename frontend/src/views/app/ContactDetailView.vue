@@ -1,68 +1,68 @@
-<!-- src/views/app/ContactDetailView.vue -->
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import apiClient from '@/utils/api';
-// Importa tus componentes de UI, helpers, y modales que necesitarás
-import Modal from '@/components/ui/Modal.vue';
-import PersonForm from '@/components/PersonForm.vue';
+  import { ref, onMounted } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
+  import apiClient from '@/utils/api';
+  import Modal from '@/components/ui/Modal.vue';
+  import PersonForm from '@/components/PersonForm.vue';
+  import { ChevronLeft } from 'lucide-vue-next';
 
-const route = useRoute();
-const company = ref<any>(null);
-const peopleInCompany = ref<any[]>([]);
-const isLoading = ref(true);
-const error = ref<string | null>(null);
+  const route = useRoute();
+  const router = useRouter();
+  const company = ref<any>(null);
+  const peopleInCompany = ref<any[]>([]);
+  const isLoading = ref(true);
+  const error = ref<string | null>(null);
 
-const companyId = route.params.id as string;
+  const companyId = route.params.id as string;
 
-// --- ESTADO PARA LOS MODALES DE ASIGNACIÓN ---
-const isAssignModalOpen = ref(false);
-const allPeople = ref<any[]>([]); // Para poblar el select
-const personToAssignId = ref<string | null>(null);
-const assignmentRole = ref('');
 
-onMounted(async () => {
-  try {
-    // Hacemos las llamadas en paralelo para más eficiencia
-    const [companyData, peopleData] = await Promise.all([
-      apiClient.get(`/companies/${companyId}`),
-      apiClient.get(`/companies/${companyId}/people`)
-    ]);
-    company.value = companyData;
-    peopleInCompany.value = peopleData;
-  } catch (e: any) {
-    error.value = e.message;
-  } finally {
-    isLoading.value = false;
+  const isAssignModalOpen = ref(false);
+  const allPeople = ref<any[]>([]); // Para poblar el select
+  const personToAssignId = ref<string | null>(null);
+  const assignmentRole = ref('');
+
+  onMounted(async () => {
+    try {
+      // Hacemos las llamadas en paralelo para más eficiencia
+      const [companyData, peopleData] = await Promise.all([
+        apiClient.get(`/companies/${companyId}`),
+        apiClient.get(`/companies/${companyId}/people`)
+      ]);
+      company.value = companyData;
+      peopleInCompany.value = peopleData;
+    } catch (e: any) {
+      error.value = e.message;
+    } finally {
+      isLoading.value = false;
+    }
+  });
+
+  async function openAssignModal() {
+    // Obtenemos la lista de todas las personas para el select
+    try {
+      allPeople.value = await apiClient.get('/people');
+      isAssignModalOpen.value = true;
+    } catch (e: any) {
+      error.value = "No se pudo cargar la lista de personas.";
+    }
   }
-});
 
-async function openAssignModal() {
-  // Obtenemos la lista de todas las personas para el select
-  try {
-    allPeople.value = await apiClient.get('/people');
-    isAssignModalOpen.value = true;
-  } catch (e: any) {
-    error.value = "No se pudo cargar la lista de personas.";
+  async function handleAssignPerson() {
+    if (!personToAssignId.value) return;
+    try {
+      await apiClient.post(`/companies/${companyId}/people`, {
+        personId: personToAssignId.value,
+        role: assignmentRole.value
+      });
+      // Refrescamos la lista de personas en la compañía
+      peopleInCompany.value = await apiClient.get(`/companies/${companyId}/people`);
+      isAssignModalOpen.value = false;
+      personToAssignId.value = null;
+      assignmentRole.value = '';
+    } catch (e: any) {
+      alert(`Error: ${e.message}`);
+    }
   }
-}
-
-async function handleAssignPerson() {
-  if (!personToAssignId.value) return;
-  try {
-    await apiClient.post(`/companies/${companyId}/people`, {
-      personId: personToAssignId.value,
-      role: assignmentRole.value
-    });
-    // Refrescamos la lista de personas en la compañía
-    peopleInCompany.value = await apiClient.get(`/companies/${companyId}/people`);
-    isAssignModalOpen.value = false;
-    personToAssignId.value = null;
-    assignmentRole.value = '';
-  } catch (e: any) {
-    alert(`Error: ${e.message}`);
-  }
-}
 </script>
 
 <template>
@@ -72,6 +72,11 @@ async function handleAssignPerson() {
   <div v-else-if="company">
     <!-- SECCIÓN DE DETALLES DE LA COMPAÑÍA -->
     <div class="mb-8">
+      <button @click="router.back()" class="btn btn-ghost btn-sm mb-4">
+        <ChevronLeft :size="20" class="mr-2" />
+        Volver
+      </button>
+
       <h1 class="text-4xl font-bold">{{ company.name }}</h1>
       <p>{{ company.type }} - {{ company.city }}, {{ company.country }}</p>
       <!-- ... (muestra aquí más detalles de la compañía) ... -->

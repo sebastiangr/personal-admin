@@ -21,7 +21,13 @@
     <div class="card-body p-4">
       <!-- Cabecera de la Tarjeta -->
       <div class="card-title flex justify-between items-start">
-        <h2 class="text-lg font-bold text-primary mr-2">{{ company.name }}</h2>
+        <!-- <h2 class="text-lg font-bold text-primary mr-2">{{ company.name }}</h2> -->
+        <RouterLink 
+          :to="{ name: 'company-detail', params: { id: company.id } }"
+          class="text-lg font-bold text-primary mr-2 link link-hover link-primary"
+        >
+          {{ company.name }}
+        </RouterLink>
         <span class="badge badge-ghost badge-sm">{{ getCompanyTypeLabel(company.type) }}</span>
       </div>
 

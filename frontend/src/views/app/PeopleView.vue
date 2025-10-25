@@ -6,12 +6,14 @@
   import ConfirmationModal from '@/components/ui/ConfirmationModal.vue';
   import SortIcon from '@/components/ui/SortIcon.vue';
   import PersonNotesModal from '@/components/ui/PersonNotesModal.vue';
-  import { Plus, UserRoundPen, Trash2, UserRoundPlus, NotepadText, FilePlus2 } from 'lucide-vue-next';
+  import PeopleGrid from '@/components/PeopleGrid.vue';
+  import { LayoutGrid, List, Plus, UserRoundPen, Trash2, UserRoundPlus, NotepadText, FilePlus2 } from 'lucide-vue-next';
 
   // --- ESTADO ---
   const people = ref<any[]>([]);
   const isLoading = ref(true);
   const error = ref<string | null>(null);
+  const viewMode = ref<'table' | 'grid'>('table');
   const sortKey = ref<string>('createdAt');
   const sortOrder = ref<'asc' | 'desc'>('asc');
   const isNotesModalOpen = ref(false);
@@ -130,6 +132,15 @@
     isNotesModalOpen.value = true;
   }
 
+  function handleCardSort(key: 'name') {
+    if (sortKey.value === key) {
+      sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortKey.value = key;
+      sortOrder.value = 'asc';
+    }
+  }  
+
   function setSort(key: string) {
     if (sortKey.value === key) {
       sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
@@ -145,9 +156,35 @@
   <div>
     <div class="flex flex-wrap gap-4 justify-between items-center mb-6">
       <h1 class="text-3xl font-bold">Personas</h1>
-      <button class="btn btn-primary" @click="openCreateModal">
-        <Plus :size="20" class="mr-2" /> Añadir Persona
-      </button>
+
+      <div class="flex gap-4 items-center">
+        <div class="flex items-center gap-2">
+
+          <div v-if="viewMode === 'grid'" class="join">
+            <button
+              class="btn btn-ghost join-item btn-sm"
+              :class="{ 'btn-active': sortKey === 'name' }"
+              @click="handleCardSort('name')"
+            >
+              Ordenar por Nombre              
+              <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="name" />
+            </button>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-ghost" :class="{ 'btn-active': viewMode === 'table' }" @click="viewMode = 'table'">
+              <List :size="20" />
+            </button>
+            <button class="btn btn-ghost" :class="{ 'btn-active': viewMode === 'grid' }" @click="viewMode = 'grid'">
+              <LayoutGrid :size="20" />
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" @click="openCreateModal">
+          <UserRoundPlus :size="20" class="mr-2" /> Añadir Persona
+        </button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="text-center p-10">
@@ -164,88 +201,100 @@
         <button class="btn btn-primary mt-4" @click="openCreateModal">Añadir la primera</button>
       </div>
 
-      <div v-else class="overflow-x-auto bg-base-100 rounded-lg shadow">
-        <table class="table w-full">
-          <thead class="bg-base-300 text-base-content text-sm uppercase">
-            <tr>
-              <th class="p-0">
-                <button @click="setSort('name')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
-                  <span>Nombre</span>
-                  <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="name" />
-                </button>
-              </th>
-              <th class="p-0">
-                <button @click="setSort('email')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
-                  <span>Email</span>
-                  <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="email" />
-                </button>
-              </th>
-              
-              <!-- La columna de LinkedIn no es ordenable, así que mantiene un estilo simple -->
-              <th class="px-4 py-3">LinkedIn</th>
-              
-              <th class="p-0">
-                <button @click="setSort('companies')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
-                  <span>Compañías Asignadas</span>
-                  <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="companies" />
-                </button>
-              </th>
-              <th class="text-center w-[150px] px-4 py-3">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- ¡IMPORTANTE! Iteramos sobre 'sortedPeople' -->
-            <tr v-for="person in sortedPeople" :key="person.id" class="hover">
-              <td class="font-semibold">{{ person.name }}</td>
-              <td>{{ person.email }}</td>
-              <td>
-                <a v-if="person.linkedinUrl" :href="person.linkedinUrl" target="_blank" class="link link-primary">
-                  Ver Perfil
-                </a>
-              </td>
-              <td>
-                <div class="flex flex-wrap gap-1">
-                  <!-- El contenido no cambia, pero se ordenará según el número de badges -->
-                  <span v-for="assignment in person.companies" :key="assignment.company.id" class="badge badge-ghost">
-                    {{ assignment.company.name }}
-                  </span>
-                </div>
-              </td>
-              <td class="text-center space-x-2">
+      <div v-else>
 
-                <div v-if="person.notes && person.notes.trim() !== ''" class="tooltip tooltip-left" data-tip="Ver/Editar Notas">
-                  <button class="btn btn-sm btn-square btn-ghost" @click="openNotesModal(person)">
-                    <NotepadText :size="20" />
+        <div v-if="viewMode === 'table'" class="overflow-x-auto bg-base-100 rounded-lg shadow">
+          <table class="table w-full">
+            <thead class="bg-base-300 text-base-content text-sm uppercase">
+              <tr>
+                <th class="p-0">
+                  <button @click="setSort('name')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
+                    <span>Nombre</span>
+                    <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="name" />
                   </button>
-                </div>
-                <div v-else class="tooltip tooltip-left" data-tip="Añadir Nota">
-                  <button class="btn btn-sm btn-square btn-ghost" @click="openNotesModal(person)">
-                    <FilePlus2 :size="20" />
+                </th>
+                <th class="p-0">
+                  <button @click="setSort('email')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
+                    <span>Email</span>
+                    <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="email" />
                   </button>
-                </div>
+                </th>
+                
+                <!-- La columna de LinkedIn no es ordenable, así que mantiene un estilo simple -->
+                <th class="px-4 py-3">LinkedIn</th>
+                
+                <th class="p-0">
+                  <button @click="setSort('companies')" class="flex items-center justify-between w-full px-4 py-3 hover:bg-base-200/50 transition-colors gap-2">
+                    <span>Compañías Asignadas</span>
+                    <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="companies" />
+                  </button>
+                </th>
+                <th class="text-center w-[150px] px-4 py-3">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- ¡IMPORTANTE! Iteramos sobre 'sortedPeople' -->
+              <tr v-for="person in sortedPeople" :key="person.id" class="hover">
+                <td class="font-semibold">{{ person.name }}</td>
+                <td>{{ person.email }}</td>
+                <td>
+                  <a v-if="person.linkedinUrl" :href="person.linkedinUrl" target="_blank" class="link link-primary">
+                    Ver Perfil
+                  </a>
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <!-- El contenido no cambia, pero se ordenará según el número de badges -->
+                    <span v-for="assignment in person.companies" :key="assignment.company.id" class="badge badge-ghost">
+                      {{ assignment.company.name }}
+                    </span>
+                  </div>
+                </td>
+                <td class="text-center space-x-2">
 
-                <div class="tooltip tooltip-left" data-tip="Editar Persona">
-                  <button class="btn btn-sm btn-square btn-ghost" @click="openEditModal(person)">
+                  <div v-if="person.notes && person.notes.trim() !== ''" class="tooltip tooltip-left" data-tip="Ver/Editar Notas">
+                    <button class="btn btn-sm btn-square btn-ghost" @click="openNotesModal(person)">
+                      <NotepadText :size="20" />
+                    </button>
+                  </div>
+                  <div v-else class="tooltip tooltip-left" data-tip="Añadir Nota">
+                    <button class="btn btn-sm btn-square btn-ghost" @click="openNotesModal(person)">
+                      <FilePlus2 :size="20" />
+                    </button>
+                  </div>
+
+                  <div class="tooltip tooltip-left" data-tip="Editar Persona">
+                    <button class="btn btn-sm btn-square btn-ghost" @click="openEditModal(person)">
+                      <UserRoundPen :size="20" />
+                    </button>
+                  </div>
+
+                  <div class="tooltip tooltip-left" data-tip="Eliminar Persona">
+                    <button class="btn btn-sm btn-square btn-ghost text-error" @click="promptForDelete(person.id)">
+                      <Trash2 :size="20" />
+                    </button>
+                  </div>
+
+                  <!-- <button class="btn btn-sm btn-square btn-ghost" @click="openEditModal(person)" data-tip="Editar Persona">
                     <UserRoundPen :size="20" />
                   </button>
-                </div>
-
-                <div class="tooltip tooltip-left" data-tip="Eliminar Persona">
-                  <button class="btn btn-sm btn-square btn-ghost text-error" @click="promptForDelete(person.id)">
+                  <button class="btn btn-sm btn-square btn-ghost text-error" @click="promptForDelete(person.id)" data-tip="Eliminar Persona">
                     <Trash2 :size="20" />
-                  </button>
-                </div>
+                  </button> -->
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-                <!-- <button class="btn btn-sm btn-square btn-ghost" @click="openEditModal(person)" data-tip="Editar Persona">
-                  <UserRoundPen :size="20" />
-                </button>
-                <button class="btn btn-sm btn-square btn-ghost text-error" @click="promptForDelete(person.id)" data-tip="Eliminar Persona">
-                  <Trash2 :size="20" />
-                </button> -->
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- VISTA DE TARJETAS -->
+        <PeopleGrid
+          v-else-if="viewMode === 'grid'"
+          :people="sortedPeople"
+          @edit-person="openEditModal"
+          @delete-person="promptForDelete"
+        />        
+
       </div>
     </div>
   </div>
