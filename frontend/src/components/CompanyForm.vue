@@ -37,31 +37,36 @@ const [notes, notesProps] = defineField('notes');
 const [interestLevel, interestLevelProps] = defineField('interestLevel');
 const [status, statusProps] = defineField('status');
 
-// 'handleSubmit' envuelve nuestra lógica. Solo se ejecuta si la validación pasa.
 const onSubmit = handleSubmit((values) => {
   emit('submit', values);
 });
 
-// Watcher para llenar el formulario en modo edición o resetearlo
+const resetValues = {
+  name: '',
+  type: CompanyType.AGENCY_STUDIO,
+  country: '', city: '', email: '', website: '', careerWebsite: '',
+  linkedinUrl: '', instagramUrl: '', behanceUrl: '',
+  notes: '',
+  interestLevel: 2,
+  status: Status.TO_CONTACT,
+};
+
 watch(() => props.initialData, (newData) => {
   if (newData) {
-    // Llena el formulario con los datos existentes
-    setValues(newData);
+    const cleanData: Record<string, any> = {};
+
+    for (const key of Object.keys(resetValues) as Array<keyof typeof resetValues>) {      
+      cleanData[key] = newData[key] ?? resetValues[key];
+    }
+    setValues(cleanData);
   } else {
-    // Resetea el formulario a sus valores iniciales por defecto
     resetForm({
-      values: {
-        name: '',
-        type: CompanyType.AGENCY_STUDIO,
-        country: '', city: '', email: '', website: '', careerWebsite: '',
-        linkedinUrl: '', instagramUrl: '', behanceUrl: '',
-        notes: '',
-        interestLevel: 2, // 'Medio' por defecto
-        status: Status.TO_CONTACT, // 'Por Contactar' por defecto
-      }
+      values: resetValues
     });
   }
-}, { immediate: true });
+}, { immediate: true, deep: true });
+
+
 </script>
 
 <template>

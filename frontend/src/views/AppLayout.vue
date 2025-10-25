@@ -70,10 +70,10 @@ watchEffect(() => {
               La clase 'router-link-active' se añade automáticamente al enlace
               de la página actual, lo que nos permite estilizarlo.
             -->
-            <RouterLink to="/app/contacts">Contactos</RouterLink>
+            <RouterLink to="/app/companies">Compañías</RouterLink>
           </li>
           <li>
-            <RouterLink to="/app/history">Histórico</RouterLink>
+            <RouterLink to="/app/people">Personas</RouterLink>
           </li>
         </ul>
       </div>
