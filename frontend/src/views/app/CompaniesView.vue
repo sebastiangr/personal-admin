@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue';
   import apiClient from '@/utils/api';
+  import CompaniesGrid from '@/components/CompaniesGrid.vue';
   import Modal from '@/components/ui/Modal.vue';
   import NotesModal from '@/components/ui/NotesModal.vue';
   import CompanyForm from '@/components/CompanyForm.vue';
@@ -9,13 +10,14 @@
   import StatusSelector from '@/components/StatusSelector.vue';
   import SortIcon from '@/components/ui/SortIcon.vue';
   import { getCompanyTypeLabel } from '@/utils/companyTypeHelper';
-  import { UserRoundPlus, NotepadText, Trash2, UserRoundPen, FilePlus, FileText, Pencil, Plus } from 'lucide-vue-next';
+  import { LayoutGrid, List, UserRoundPlus, NotepadText, Trash2, UserRoundPen, FilePlus, FileText, Pencil, Plus } from 'lucide-vue-next';
 
   // --- STATES ---
   const companies = ref<any[]>([]);
   const isLoading = ref(true);
   const error = ref<string | null>(null);
-  const sortKey = ref<string>('createdAt'); // Ordenar por fecha de creación por defecto
+  const viewMode = ref<'table' | 'grid'>('table');
+  const sortKey = ref<string>('createdAt');
   const sortOrder = ref<'asc' | 'desc'>('desc');
 
   // Modal states
@@ -68,7 +70,6 @@
   }
 
   onMounted(fetchCompanies);
-
 
   function handleCompanyUpdate(updatedCompany: any) {
     const index = companies.value.findIndex(c => c.id === updatedCompany.id);
@@ -144,6 +145,10 @@
     }
   }
 
+  function handleCardSort(key: 'name' | 'status' | 'interestLevel') {
+    setSort(key);
+  }
+
 </script>
 
 <template>
@@ -151,9 +156,58 @@
     <!-- ENCABEZADO DE LA VISTA -->
     <div class="flex flex-wrap gap-4 justify-between items-center mb-6">
       <h1 class="text-3xl font-bold">Compañías</h1>
-      <button class="btn btn-primary" @click="openCreateModal">
-        <Plus :size="20" class="mr-2" /> Añadir Compañía
-      </button>
+      <div class="flex gap-4 items-center">
+
+        <div class="flex items-center gap-2">
+          
+          <!-- --- INICIO: NUEVOS BOTONES DE ORDENAMIENTO (SOLO PARA VISTA GRID) --- -->
+          <!-- Este 'div' completo solo se muestra si viewMode es 'grid' -->
+          <div v-if="viewMode === 'grid'" class="join">
+            <button 
+              class="btn btn-ghost join-item btn-sm"
+              :class="{ 'btn-active': sortKey === 'name' }"
+              @click="handleCardSort('name')"
+            >
+              Nombre
+            </button>
+            <button 
+              class="btn btn-ghost join-item btn-sm"
+              :class="{ 'btn-active': sortKey === 'status' }"
+              @click="handleCardSort('status')"
+            >
+              Estado
+            </button>
+            <button 
+              class="btn btn-ghost join-item btn-sm"
+              :class="{ 'btn-active': sortKey === 'interestLevel' }"
+              @click="handleCardSort('interestLevel')"
+            >
+              Interés
+            </button>
+          </div>
+
+          <div class="btn-group">
+            <button 
+              class="btn btn-ghost" 
+              :class="{ 'btn-active': viewMode === 'table' }"
+              @click="viewMode = 'table'"
+            >
+              <List :size="20" />
+            </button>
+            <button 
+              class="btn btn-ghost" 
+              :class="{ 'btn-active': viewMode === 'grid' }"
+              @click="viewMode = 'grid'"
+            >
+              <LayoutGrid :size="20" />
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" @click="openCreateModal">
+          <Plus :size="20" class="mr-2" /> Añadir Compañía
+        </button>
+      </div>
     </div>
 
     <!-- ESTADO DE CARGA -->
@@ -175,7 +229,9 @@
       </div>
 
       <!-- TABLA DE COMPAÑÍAS (CON DATOS) -->
-      <div v-else class="overflow-x bg-base-100 rounded-lg shadow">
+      <!-- <div v-else class="overflow-x bg-base-100 rounded-lg shadow"> -->
+      <div v-else>
+      <div v-if="viewMode === 'table'" class="overflow-x-auto bg-base-100 rounded-lg shadow">
         <table class="table w-full">
           <!-- ENCABEZADO DE LA TABLA -->
           <thead class="bg-base-300 text-base-content text-sm uppercase">
@@ -271,7 +327,19 @@
           </tbody>
         </table>
       </div>
+
+      <CompaniesGrid
+        v-else-if="viewMode === 'grid'"
+        :companies="sortedCompanies"
+        @update-company="handleCompanyUpdate"
+        @edit-company="openEditModal"
+        @delete-company="promptForDelete"
+        @view-company-notes="openNotesModal"
+      />   
+      </div>   
+      
     </div>
+    
   </div>
 
   <!-- MODALES (Viven fuera del flujo principal del template) -->

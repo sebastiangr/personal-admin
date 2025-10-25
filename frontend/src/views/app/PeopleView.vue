@@ -190,7 +190,7 @@
                   <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="companies" />
                 </button>
               </th>
-              <th class="text-center w-[120px] px-4 py-3">Acciones</th>
+              <th class="text-center w-[150px] px-4 py-3">Acciones</th>
             </tr>
           </thead>
           <tbody>
