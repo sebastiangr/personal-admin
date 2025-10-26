@@ -9,7 +9,7 @@
 </script>
 
 <template>
-  <div class="card bg-base-100 shadow-md border border-base-300 transition-all hover:shadow-xl hover:-translate-y-1">
+  <div class="card bg-base-100 shadow-md border border-base-300 transition-all hover:shadow-xl">
     <div class="card-body p-4">
       <!-- Cabecera: Nombre y Email -->
       <div>

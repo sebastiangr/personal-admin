@@ -3,7 +3,7 @@
   import { getCompanyTypeLabel } from '@/utils/companyTypeHelper';
   import StatusSelector from './StatusSelector.vue';
   import InteractiveInterest from './InteractiveInterest.vue';
-  import { NotepadText, UserRoundPen, Trash2, FilePlus2, ExternalLink } from 'lucide-vue-next';
+  import { NotepadText, Pencil, Trash2, FilePlus, ExternalLink } from 'lucide-vue-next';
 
   const props = defineProps<{
     company: any;
@@ -17,7 +17,7 @@
 </script>
 
 <template>
-  <div class="card bg-base-100 shadow-md border border-base-300 transition-all hover:shadow-xl hover:-translate-y-1">
+  <div class="card bg-base-100 shadow-md border border-base-300 transition-all hover:shadow-xl relative focus-within:z-10">
     <div class="card-body p-4">
       <!-- Cabecera de la Tarjeta -->
       <div class="card-title flex justify-between items-start">
@@ -64,12 +64,12 @@
         <div class="tooltip" :data-tip="company.notes ? 'Ver/Editar Notas' : 'Añadir Nota'">
           <button class="btn btn-sm btn-square btn-ghost" @click="$emit('view-notes', company)">
             <NotepadText v-if="company.notes" :size="20" />
-            <FilePlus2 v-else :size="20" />
+            <FilePlus v-else :size="20" />
           </button>
         </div>
         <div class="tooltip" data-tip="Editar Compañía">
           <button class="btn btn-sm btn-square btn-ghost" @click="$emit('edit', company)">
-            <UserRoundPen :size="20" />
+            <Pencil :size="20" />
           </button>
         </div>
         <div class="tooltip" data-tip="Eliminar">

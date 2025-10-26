@@ -77,7 +77,7 @@ function cancelEdit() {
 </script>
 
 <template>
-  <Modal v-model="isOpen" :title="'Añadir Notas'">
+  <Modal v-model="isOpen" :title="'Añadir Nota'">
 
     <div v-if="company">
 

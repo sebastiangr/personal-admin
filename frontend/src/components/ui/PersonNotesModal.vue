@@ -5,7 +5,7 @@
   import { Check } from 'lucide-vue-next';
 
   const props = defineProps<{
-    person: any | null // Recibe el objeto completo de la persona
+    person: any | null 
   }>();
 
   const emit = defineEmits(['notes-updated']);
@@ -64,17 +64,25 @@
 </script>
 
 <template>
-  <Modal v-model="isOpen" :title="''">
+  <Modal v-model="isOpen" :title="'Añadir Nota'">
     <div v-if="person">
-      <!-- CABECERA PERSONALIZADA -->
-      <div class="mb-4 -mt-4">
+      
+      <div class="flex justify-between items-center mb-4">        
+        <div class="mb-4 mt-4">
+          <h2 class="text-xl font-bold text-primary">{{ person.name }}</h2>
+          <p v-if="person.email" class="text-sm text-base-content/60 italic">
+            {{ person.email }}
+          </p>
+        </div>        
+      </div>
+
+      <!-- <div class="mb-4 -mt-4">
         <h2 class="text-xl font-bold text-primary">{{ person.name }}</h2>
         <p v-if="person.email" class="text-sm text-base-content/60 italic">
           {{ person.email }}
         </p>
-      </div>
-
-      <!-- ÁREA DE CONTENIDO -->
+      </div> -->
+      
       <div>
         <div v-if="!isInEditMode" class="prose max-w-none bg-base-200 p-4 rounded-lg min-h-[200px] whitespace-pre-wrap">
           <p v-if="notesContent">{{ notesContent }}</p>
@@ -93,7 +101,6 @@
       </div>
     </div>
 
-    <!-- ACCIONES -->
     <template #actions>
       <div v-if="person" class="w-full">
         <div v-if="!isInEditMode" class="flex justify-between w-full">

@@ -46,7 +46,7 @@
 </script>
 
 <template>
-  <div class="dropdown dropdown-end dropdown-hover">
+  <div class="dropdown dropdown-center dropdown-hover">
     <!-- El badge que se muestra siempre y que activa el dropdown -->
     <div tabindex="0" role="button" class="badge cursor-pointer" :class="currentStatusInfo.colorClass">
       <span v-if="isLoading" class="loading loading-spinner loading-xs mr-1"></span>
@@ -54,7 +54,7 @@
     </div>
 
     <!-- El contenido del dropdown que se muestra al hacer clic -->
-    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[50] w-52 p-2 shadow">
       <li v-for="status in selectableStatuses" :key="status" @click="updateStatus(status)">
         <a :class="{ 'bg-base-300': status === currentStatus }">
           <Check v-if="status === currentStatus" :size="16" class="text-primary" />

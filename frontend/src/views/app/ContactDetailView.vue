@@ -3,6 +3,7 @@
   import { useRoute, useRouter } from 'vue-router';
   import apiClient from '@/utils/api';
   import Modal from '@/components/ui/Modal.vue';
+  import ConfirmationModal from '@/components/ui/ConfirmationModal.vue';
   import PersonForm from '@/components/PersonForm.vue';
   import { ChevronLeft, Trash2 } from 'lucide-vue-next';
 
@@ -15,15 +16,17 @@
 
   const companyId = route.params.id as string;
 
-
   const isAssignModalOpen = ref(false);
-  const allPeople = ref<any[]>([]); // Para poblar el select
+  const isConfirmUnassignModalOpen = ref(false);
+  const allPeople = ref<any[]>([]);
+  const availablePeople = ref<any[]>([]);
   const personToAssignId = ref<string | null>(null);
+  const personToUnassign = ref<any | null>(null);
+  const isUnassigning = ref(false);
   const assignmentRole = ref('');
 
   onMounted(async () => {
-    try {
-      // Hacemos las llamadas en paralelo para más eficiencia
+    try {      
       const [companyData, peopleData] = await Promise.all([
         apiClient.get(`/companies/${companyId}`),
         apiClient.get(`/companies/${companyId}/people`)
@@ -37,16 +40,18 @@
     }
   });
 
-  async function openAssignModal() {
-    // Obtenemos la lista de todas las personas para el select
+  async function openAssignModal() {    
     try {
       allPeople.value = await apiClient.get('/people');
+      const assignedIds = new Set(peopleInCompany.value.map(p => p.id));
+      availablePeople.value = allPeople.value.filter(p => !assignedIds.has(p.id));
       isAssignModalOpen.value = true;
     } catch (e: any) {
       error.value = "No se pudo cargar la lista de personas.";
     }
   }
 
+  // TODO: No urgente, verificar que la persona ya no esté asignada a la compañía, no mostrarla en el dropdown.
   async function handleAssignPerson() {
     if (!personToAssignId.value) return;
     try {
@@ -54,7 +59,7 @@
         personId: personToAssignId.value,
         role: assignmentRole.value
       });
-      // Refrescamos la lista de personas en la compañía
+      
       peopleInCompany.value = await apiClient.get(`/companies/${companyId}/people`);
       isAssignModalOpen.value = false;
       personToAssignId.value = null;
@@ -64,15 +69,24 @@
     }
   }
 
-  async function handleUnassignPerson(personId: string) {
-    if (!confirm('¿Estás seguro de que quieres desasignar a esta persona de la compañía?')) {
-      return;
-    }
-    try {
-      await apiClient.delete(`/companies/${companyId}/people/${personId}`);      
-      peopleInCompany.value = peopleInCompany.value.filter(p => p.id !== personId);
+  function promptForUnassign(person: any) {
+    personToUnassign.value = person;
+    isConfirmUnassignModalOpen.value = true;
+  }  
+
+  async function handleConfirmUnassign() {
+    if (!personToUnassign.value) return;
+
+    isUnassigning.value = true;
+    try {      
+      await apiClient.delete(`/companies/${companyId}/people/${personToUnassign.value.id}`);            
+      peopleInCompany.value = peopleInCompany.value.filter(p => p.id !== personToUnassign.value.id);            
+      isConfirmUnassignModalOpen.value = false;
     } catch (e: any) {
       alert(`Error: ${e.message}`);
+    } finally {
+      isUnassigning.value = false;
+      personToUnassign.value = null;
     }
   }  
 </script>
@@ -108,11 +122,10 @@
         <li v-for="person in peopleInCompany" :key="person.id" class="flex justify-between items-center p-2 bg-base-100 rounded-lg">
           <span>
             {{ person.name }} <span v-if="person.role" class="text-base-content/60">- {{ person.role }}</span>
-          </span>
-          <!-- TODO: Añadir modal para confirmar eliminación -->
-          <button class="btn btn-xs btn-ghost text-error" @click="handleUnassignPerson(person.id)">
-            <Trash2 :size="20" />
-          </button>
+          </span>          
+          <button class="btn btn-xs btn-ghost text-error" @click="promptForUnassign(person)">
+            <Trash2 :size="16" />
+          </button>     
         </li>
       </ul>
     </div>
@@ -124,7 +137,7 @@
       <label class="label"><span class="label-text">Selecciona una Persona</span></label>
       <select v-model="personToAssignId" class="select select-bordered">
         <option disabled :value="null">Elige un contacto</option>
-        <option v-for="person in allPeople" :key="person.id" :value="person.id">
+        <option v-for="person in availablePeople" :key="person.id" :value="person.id">
           {{ person.name }}
         </option>
       </select>
@@ -139,4 +152,15 @@
       <button class="btn btn-primary" @click="handleAssignPerson">Asignar</button>
     </template>
   </Modal>
+
+  <ConfirmationModal
+    v-model="isConfirmUnassignModalOpen"
+    title="Confirmar Desasignación"
+    :message="`¿Estás seguro de que quieres desasignar a '${personToUnassign?.name}' de esta compañía?`"
+    confirm-text="Sí, Desasignar"
+    :is-loading="isUnassigning"
+    @confirm="handleConfirmUnassign"
+    @cancel="isConfirmUnassignModalOpen = false"
+  />
+
 </template>

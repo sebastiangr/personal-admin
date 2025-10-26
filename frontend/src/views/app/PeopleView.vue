@@ -7,7 +7,7 @@
   import SortIcon from '@/components/ui/SortIcon.vue';
   import PersonNotesModal from '@/components/ui/PersonNotesModal.vue';
   import PeopleGrid from '@/components/PeopleGrid.vue';
-  import { LayoutGrid, List, Plus, UserRoundPen, Trash2, UserRoundPlus, NotepadText, FilePlus2 } from 'lucide-vue-next';
+  import { LayoutGrid, List, Plus, UserRoundPen, Trash2, UserRoundPlus, NotepadText, FilePlus } from 'lucide-vue-next';
 
   // --- ESTADO ---
   const people = ref<any[]>([]);
@@ -259,7 +259,7 @@
                   </div>
                   <div v-else class="tooltip tooltip-left" data-tip="Añadir Nota">
                     <button class="btn btn-sm btn-square btn-ghost" @click="openNotesModal(person)">
-                      <FilePlus2 :size="20" />
+                      <FilePlus :size="20" />
                     </button>
                   </div>
 
