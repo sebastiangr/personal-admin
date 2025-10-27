@@ -59,10 +59,10 @@
       <form @submit="onSubmit" class="card-body">
         <h1 class="card-title text-2xl mb-4 text-center block">Personal Admin</h1>
         
-        <div v-if="successMessage" class="alert alert-success text-sm">
+        <div v-if="successMessage" class="alert alert-success text-sm mb-4">
           <span>{{ successMessage }}</span>
         </div>
-        <div v-if="serverError" class="alert alert-error text-sm">
+        <div v-if="serverError" class="alert alert-error text-sm mb-4">
           <span>{{ serverError }}</span>
         </div>
                 
