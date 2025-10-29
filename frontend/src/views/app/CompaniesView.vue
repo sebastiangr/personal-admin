@@ -10,7 +10,7 @@
   import StatusSelector from '@/components/StatusSelector.vue';
   import SortIcon from '@/components/ui/SortIcon.vue';
   import { getCompanyTypeLabel } from '@/utils/companyTypeHelper';
-  import { LayoutGrid, List, UserRoundPlus, NotepadText, Trash2, UserRoundPen, FilePlus, FileText, Pencil, Plus } from 'lucide-vue-next';
+  import { LayoutGrid, List, UserRoundPlus, NotepadText, Trash2, UserRoundPen, FilePlus, FileText, Pencil, Plus, AArrowDown, MessageCircleWarning, Flag } from 'lucide-vue-next';
 
   // --- STATES ---
   const companies = ref<any[]>([]);
@@ -158,33 +158,37 @@
       <h1 class="text-3xl font-bold">Compañías</h1>
       <div class="flex gap-4 items-center">
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center">
                               
-          <div v-if="viewMode === 'grid'" class="join">
+          <div v-if="viewMode === 'grid'" class="flex btn-group gap-2 mr-2">
             <button 
-              class="btn btn-ghost join-item btn-sm"
+              class="btn btn-ghost btn-sm tooltip tooltip-bottom"
+              data-tip="Ordenar por nombre"
               :class="{ 'btn-active': sortKey === 'name' }"
               @click="handleCardSort('name')"
             >
-              Nombre
+              <AArrowDown :size="20" />
             </button>
             <button 
-              class="btn btn-ghost join-item btn-sm"
+              class="btn btn-ghost btn-sm tooltip tooltip-bottom"
+              data-tip="Ordenar por estado"
               :class="{ 'btn-active': sortKey === 'status' }"
               @click="handleCardSort('status')"
             >
-              Estado
+              <MessageCircleWarning :size="20" />
             </button>
-            <button 
-              class="btn btn-ghost join-item btn-sm"
+            <button
+              class="btn btn-ghost btn-sm tooltip tooltip-bottom"
+              data-tip="Ordenar por nivel de interés"
               :class="{ 'btn-active': sortKey === 'interestLevel' }"
               @click="handleCardSort('interestLevel')"
             >
-              Interés
+              <Flag :size="20" />
             </button>
+            <div class="border-r border-l border-r-gray-300 border-l-gray-300"></div>
           </div>
 
-          <div class="btn-group">
+          <div class="flex btn-group gap-2">
             <button 
               class="btn btn-ghost" 
               :class="{ 'btn-active': viewMode === 'table' }"

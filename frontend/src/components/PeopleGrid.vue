@@ -5,7 +5,7 @@
     people: any[];
   }>();
 
-  const emit = defineEmits(['edit-person', 'delete-person']);
+  const emit = defineEmits(['edit-person', 'delete-person', 'view-person-notes']);
 </script>
 
 <template>
@@ -16,6 +16,7 @@
       :person="person"
       @edit="(personToEdit) => emit('edit-person', personToEdit)"
       @delete="(personId) => emit('delete-person', personId)"
+      @view-notes="(personForNotes) => emit('view-person-notes', personForNotes)"
     />
   </div>
 </template>

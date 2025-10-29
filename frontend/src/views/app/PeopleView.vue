@@ -169,13 +169,22 @@
               Ordenar por Nombre              
               <SortIcon :sort-key="sortKey" :sort-order="sortOrder" current-key="name" />
             </button>
+            <div class="border-r border-l border-r-gray-300 border-l-gray-300"></div>
           </div>
 
-          <div class="btn-group">
-            <button class="btn btn-ghost" :class="{ 'btn-active': viewMode === 'table' }" @click="viewMode = 'table'">
+          <div class="flex btn-group gap-2">
+            <button 
+              class="btn btn-ghost" 
+              :class="{ 'btn-active': viewMode === 'table' }" 
+              @click="viewMode = 'table'"
+            >
               <List :size="20" />
             </button>
-            <button class="btn btn-ghost" :class="{ 'btn-active': viewMode === 'grid' }" @click="viewMode = 'grid'">
+            <button 
+              class="btn btn-ghost" 
+              :class="{ 'btn-active': viewMode === 'grid' }" 
+              @click="viewMode = 'grid'"
+            >
               <LayoutGrid :size="20" />
             </button>
           </div>
@@ -293,6 +302,7 @@
           :people="sortedPeople"
           @edit-person="openEditModal"
           @delete-person="promptForDelete"
+          @view-person-notes="openNotesModal"
         />        
 
       </div>
