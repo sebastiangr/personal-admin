@@ -1,7 +1,7 @@
 # Personal Admin (Tiny CRM)
 > A minimalist, self-hosted micro-CRM for freelance developers, designers, and agencies to manage their job hunting and lead generation process strategically.
 
-![image](https://placehold.co/800x400/222/FFF?text=App+Screenshot+Coming+Soon)
+![image](./screenshot.jpg)
 
 This project was born out of a personal need to apply a surgical, focused approach to finding opportunities, moving away from mass applications towards a curated "Dream 100 List".
 
